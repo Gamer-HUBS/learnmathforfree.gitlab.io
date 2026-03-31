@@ -1,0 +1,9 @@
+pages:
+  stage: deploy
+  script:
+  - mkdir -p public
+  - find . -maxdepth 1 -not -name 'public' -not -name '.' -exec mv {} public/ \;
+
+  artifacts:
+    paths:
+      - public

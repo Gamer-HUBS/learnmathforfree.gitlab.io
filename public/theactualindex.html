@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <title>Home</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="icon" type="image/x-icon" href="/favicon.ico">
+
+  <style>
+    body {
+      background-color: gray;
+      margin: 0;
+      font-family: sans-serif;
+    }
+
+    #thestuff {
+      padding: 20px;
+      text-align: center;
+    }
+
+    input {
+      padding: 8px;
+      font-size: 16px;
+      margin-right: 8px;
+    }
+
+    button {
+      padding: 8px 12px;
+      font-size: 16px;
+      cursor: pointer;
+    }
+  </style>
+
+  <!-- Firebase -->
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+
+  <script src="js/uttils.js"></script>
+  <script src="js/configstuff.js"></script>
+  <script src="js/user.js"></script>
+
+</head>
+
+<body>
+  <div id="thestuff">
+    <input type="text" placeholder="Passcode" id="passcodeInput">
+    <button onclick="checkPasscodeClick()">Submit</button>
+    <p>Welcome to the protected content area. Please enter the passcode to access the content.</p>
+  </div>
+  <div id="content"></div>
+</body>
+
+</html>

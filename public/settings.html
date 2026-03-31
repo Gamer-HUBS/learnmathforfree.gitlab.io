@@ -1,0 +1,429 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8" />
+  <meta name="referrer" content="no-referrer" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Settings Panel — PowerSchool Style</title>
+
+  <style>
+    :root {
+      --nav-h: 70px;
+      --gap: 16px;
+      --card-bg: #12121a;
+      --page-bg: #0e1117;
+      --accent: #4f7cff;
+      --muted: #aaa;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial;
+    }
+
+    body {
+      background: var(--page-bg) url('images/background.png') center/cover no-repeat fixed;
+      color: #e6edf3;
+      min-height: 100vh;
+      height: 100vh;
+      overflow: hidden;
+      padding-top: var(--nav-h);
+    }
+
+    nav {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: var(--nav-h);
+      background: #161b22;
+      border-bottom: 1px solid #30363d;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 10px 20px;
+      z-index: 200;
+    }
+
+    nav .left {
+      display: flex;
+      gap: 12px;
+      align-items: center;
+    }
+
+    nav .right {
+      display: flex;
+      gap: 12px;
+      align-items: center;
+    }
+
+    nav img {
+      height: 32px;
+      cursor: pointer;
+      margin-left: 12px;
+    }
+
+    nav h3 {
+      font-size: 1rem;
+      color: #fff;
+      cursor: pointer;
+    }
+
+    nav button {
+      background: #238636;
+      color: white;
+      border: none;
+      padding: 6px 12px;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 14px;
+    }
+
+    nav button:hover {
+      background: #2ea043;
+    }
+
+    .grid-wrap {
+      height: calc(100vh - var(--nav-h));
+      padding: calc(var(--gap) + 10px);
+      display: grid;
+      gap: var(--gap);
+      grid-template-columns: repeat(3, 1fr);
+      grid-template-rows: 1fr 1fr;
+      align-items: start;
+      overflow: hidden;
+    }
+
+    .card {
+      background: var(--card-bg);
+      border-radius: 12px;
+      padding: 14px;
+      box-shadow: 0 12px 32px rgba(0, 0, 0, 0.45);
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      min-height: 0;
+      overflow: auto;
+    }
+
+    .card h2 {
+      font-size: 1.05rem;
+      color: #fff;
+      margin-bottom: 4px
+    }
+
+    .card p {
+      color: var(--muted);
+      font-size: 0.85rem;
+      margin-bottom: 8px
+    }
+
+    input,
+    select,
+    button {
+      border-radius: 8px;
+      border: 0;
+      padding: 10px 12px;
+      font-size: 0.95rem;
+    }
+
+    input,
+    select {
+      background: #0f1317;
+      color: #e6edf3
+    }
+
+    button {
+      background: var(--accent);
+      color: white;
+      font-weight: 600;
+      cursor: pointer
+    }
+
+    button:active {
+      transform: scale(0.99)
+    }
+
+    .small {
+      font-size: 0.8rem;
+      color: #9aa3b2;
+      padding-top: 6px
+    }
+
+    @media (max-width:1100px) {
+      .grid-wrap {
+        grid-template-columns: repeat(2, 1fr);
+        grid-template-rows: auto auto auto;
+      }
+    }
+
+    @media (max-width:700px) {
+      body {
+        padding-top: 72px
+      }
+
+      .grid-wrap {
+        grid-template-columns: 1fr;
+        grid-template-rows: repeat(6, 1fr);
+        padding: 12px;
+      }
+    }
+  </style>
+
+  <link rel="icon" id="favicon-link"
+    href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAoAAAAKCAYAAACNMs+9AAAAGUlEQVQYV2NkQAP/Gf4n4GBgYAAA/wP///+5AADeRgobNJd7TQAAAABJRU5ErkJggg==" />
+
+</head>
+
+<body>
+
+  <nav>
+    <div id='nav-left'>
+      <!-- Dynamic Nav Items will be injected here -->
+    </div>
+    <div id="nav-right">
+      <button id="grid-toggle" onclick="document.body.classList.toggle('grid-view')">Toggle View</button>
+
+      <img src="images/panic.png" alt="Panic Button" id="panic-button" title="Panic Button - Go to Google">
+      <img src="images/chat.png" alt="Chat" id="chat-button"
+        onclick="window.location.href='https://lolfactor39.github.io/chat/'" title="Chat with friends!">
+      <h3 id="home-button" style="cursor: pointer;" onclick="window.location.href='./settings.html'" title="Home">
+        Settings</h3>
+      <h3 style="cursor:pointer;" onclick="window.location.href = './about.html'" title="About Me">
+        About Me
+      </h3>
+    </div>
+  </nav>
+
+  <div class="grid-wrap" id="controlPanel">
+
+    <!-- 1. TAB CLOAKING (The "Thing Right") -->
+    <section class="card" id="card-cloaking">
+      <h2>1 — Tab Cloaking</h2>
+      <p>Disguise this tab as another website (Title & Favicon).</p>
+
+      <label class="small" style="display:block;margin-bottom:4px">Preset Disguises:</label>
+      <select id="cloak-preset">
+        <option value="default">Default (MathLearnHub)</option>
+        <option value="classroom">Google Classroom</option>
+        <option value="drive">Google Drive</option>
+        <option value="docs">Google Docs</option>
+        <option value="gmail">Gmail</option>
+        <option value="powerschool">PowerSchool</option>
+      </select>
+      <button id="btn-apply-preset">Apply Preset</button>
+
+      <hr style="border:0;border-top:1px solid #333;margin:12px 0;">
+
+      <label class="small" style="display:block;margin-bottom:4px">Custom Disguise:</label>
+      <input id="custom-title" type="text" placeholder="Tab Title (e.g. My Drive)" />
+      <input id="custom-favicon" type="text" placeholder="Favicon URL or data:image/..." style="margin-top:6px" />
+      <div style="display:flex;gap:6px;margin-top:6px;align-items:center">
+        <button id="btn-apply-custom" style="flex:1">Apply Custom</button>
+        <img id="favicon-preview" src=""
+          style="width:32px;height:32px;background:#333;border-radius:4px;display:none" />
+      </div>
+    </section>
+
+    <!-- 2. PANIC SETTINGS -->
+    <section class="card" id="card-panic">
+      <h2>2 — Panic Settings</h2>
+      <p>Configure what happens when you press the Panic Key.</p>
+
+      <label class="small">Panic Redirect URL:</label>
+      <input id="panic-url" type="text" placeholder="https://classroom.google.com" />
+      <button id="btn-save-panic-url" style="margin-top:6px">Save Redirect</button>
+
+      <div style="height:12px"></div>
+
+      <label class="small">Panic Key (Default: `):</label>
+      <input id="panic-key" type="text" maxlength="1" placeholder="Press key..." style="text-align:center;width:50px" />
+      <span class="small">Current: <strong id="current-panic-key">`</strong></span>
+    </section>
+
+    <!-- 3. LAUNCHER -->
+    <section class="card" id="card-launcher">
+      <h2>3 — Safe Launcher</h2>
+      <p>Open websites safely.</p>
+      <button id="btn-about-blank" style="background:#8a2be2;">Open Blank Cloaked Tab</button>
+      <p class="small" style="margin-top:8px">Opens a new about:blank tab with your current disguise applied.</p>
+
+      <div style="height:12px"></div>
+      <input id="launch-url" type="text" placeholder="https://example.com" />
+      <button id="btn-launch-frame" style="margin-top:6px">Launch in Frame</button>
+    </section>
+
+    <!-- 4. DEBUG -->
+    <section class="card" id="card-debug">
+      <h2>4 — Debug / Info</h2>
+      <button id="btn-clear-settings" style="background:#d32f2f">Reset All Settings</button>
+      <pre id="debug-log" style="margin-top:8px;font-size:0.7rem;color:#777"></pre>
+    </section>
+
+  </div>
+
+  <!-- FIREBASE & CORE -->
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+  <script src="js/configstuff.js"></script>
+  <script src="js/user.js"></script>
+
+  <!-- NEW SETTINGS LOADER (Must be after configstuff for consistent order, though independent) -->
+  <script src="js/settings-loader.js"></script>
+  <script src="js/antiblock.js"></script>
+
+  <script>
+    // --- UI Logic for Settings Page ---
+    (function () {
+      // Elements
+      const presetSelect = document.getElementById('cloak-preset');
+      const btnApplyPreset = document.getElementById('btn-apply-preset');
+      const customTitle = document.getElementById('custom-title');
+      const customFavicon = document.getElementById('custom-favicon');
+      const btnApplyCustom = document.getElementById('btn-apply-custom');
+      const favPreview = document.getElementById('favicon-preview');
+
+      const panicUrlInput = document.getElementById('panic-url');
+      const btnSavePanicUrl = document.getElementById('btn-save-panic-url');
+      const panicKeyInput = document.getElementById('panic-key');
+      const currentPanicKeyDisplay = document.getElementById('current-panic-key');
+
+      const btnAboutBlank = document.getElementById('btn-about-blank');
+      const launchInput = document.getElementById('launch-url');
+      const btnLaunchFrame = document.getElementById('btn-launch-frame');
+      const btnClearSettings = document.getElementById('btn-clear-settings');
+
+      const navLeft = document.getElementById('nav-left');
+      const navRight = document.getElementById('nav-right');
+
+
+      // 1. Load Initial UI State from Settings
+      function loadUI() {
+        // We don't have a direct "get" for title/favicon in the exposed API yet unless we stick to localStorage reading
+        // But that is fine.
+        panicUrlInput.value = localStorage.getItem("panicUrl") || "https://classroom.google.com";
+        currentPanicKeyDisplay.textContent = settings.getPanicKey();
+
+        // Preview Custom Favicon if present
+        const savedFav = localStorage.getItem("cloakedFavicon");
+        if (savedFav && savedFav.startsWith("data:")) {
+          favPreview.src = savedFav;
+          favPreview.style.display = "block";
+        }
+      }
+
+      // 2. Event Listeners
+
+      // Presets
+      btnApplyPreset.addEventListener('click', () => {
+        settings.setCloak(presetSelect.value);
+        // Visual feedback
+        btnApplyPreset.textContent = "Applied!";
+        setTimeout(() => btnApplyPreset.textContent = "Apply Preset", 1000);
+      });
+
+      // Custom
+      btnApplyCustom.addEventListener('click', () => {
+        const t = customTitle.value.trim();
+        const f = customFavicon.value.trim();
+        if (!t && !f) return alert("Enter a title or favicon URL.");
+
+        settings.setCustomCloak(t, f);
+
+        if (f) {
+          favPreview.src = f;
+          favPreview.style.display = "block";
+        }
+
+        btnApplyCustom.textContent = "Applied!";
+        setTimeout(() => btnApplyCustom.textContent = "Apply Custom", 1000);
+      });
+
+      // Panic
+      btnSavePanicUrl.addEventListener('click', () => {
+        const url = panicUrlInput.value.trim();
+        if (url) {
+          settings.setPanicUrl(url);
+          alert("Panic URL saved.");
+        }
+      });
+
+      panicKeyInput.addEventListener('keydown', (e) => {
+        e.preventDefault();
+        const key = e.key;
+        settings.setPanicKey(key);
+        currentPanicKeyDisplay.textContent = key;
+        panicKeyInput.value = "";
+        alert(`Panic key set to: ${key}`);
+      });
+
+      // Launcher
+      btnAboutBlank.addEventListener('click', () => {
+        // Launch a blank tab that looks like the cloak
+        settings.openAboutBlank("");
+      });
+
+      btnLaunchFrame.addEventListener('click', () => {
+        const url = launchInput.value.trim();
+        if (url) {
+          // Use configstuff's launchIframe if available, or fallback
+          if (window.launchIframe) window.launchIframe(url);
+          else {
+            const win = window.open(url, '_blank');
+            if (!win) alert("Popup blocked");
+          }
+        }
+      });
+
+      // Reset
+      btnClearSettings.addEventListener('click', () => {
+        if (confirm("Reset all settings?")) {
+          localStorage.clear();
+          location.reload();
+        }
+      });
+
+      // Panic Button (Top Nav)
+      document.getElementById('panic-button').addEventListener('click', () => {
+        // Trigger panic via the loader
+        window.location.href = localStorage.getItem("panicUrl") || "https://classroom.google.com";
+      });
+
+      // --- Navbar Logic (Restored) ---
+      function createNavItem(text, href) {
+        const span = document.createElement('span');
+        span.textContent = text;
+        span.style.marginRight = '12px';
+        span.style.cursor = 'pointer';
+        span.onclick = () => window.location.href = href;
+        span.onmouseover = () => span.style.color = '#4f7cff';
+        span.onmouseout = () => span.style.color = 'inherit';
+        return span;
+      }
+
+      // We rely on sessionStorage for role because that's what login uses
+      let isAdmin = sessionStorage.getItem('isAdmin') === 'true';
+      let freeAccess = sessionStorage.getItem('freeAccess') === 'true';
+
+      if (isAdmin) {
+        navLeft.appendChild(createNavItem('Gamer HUBS - Admin', './games.html?admin=True'));
+        navRight.appendChild(createNavItem('Admin Table', './adtable.html'));
+        navRight.appendChild(createNavItem('Leaderboard', './leaderboard.html?admin=True'));
+      } else if (freeAccess) {
+        navLeft.appendChild(createNavItem('Gamer HUBS - Free', './games.html?free=True'));
+      } else {
+        navLeft.appendChild(createNavItem('Gamer HUBS', './games.html'));
+      }
+
+      // Initialize
+      loadUI();
+
+    })();
+  </script>
+</body>
+
+</html>

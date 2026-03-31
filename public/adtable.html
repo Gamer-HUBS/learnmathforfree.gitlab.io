@@ -1,0 +1,423 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="referrer" content="no-referrer">
+  <title>Admin Panel</title>
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+  <script src="./js/configstuff.js"></script>
+  <script src="./js/user.js"></script>
+  <script src="./js/settings-loader.js"></script>
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    .no-cursor-pointer {
+      cursor: default;
+    }
+
+    body {
+      font-family: system-ui, sans-serif;
+      background: #0e1117;
+      color: #e6edf3;
+      padding-top: 70px;
+    }
+
+    nav {
+      background: #161b22;
+      padding: 10px 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      z-index: 100;
+      border-bottom: 1px solid #30363d;
+    }
+
+    nav h3 {
+      cursor: pointer;
+      font-size: 1.5em;
+      color: #fff;
+    }
+
+    nav img {
+      height: 32px;
+      cursor: pointer;
+      margin-left: 12px;
+    }
+
+    #adminApp {
+      width: 100%;
+      margin: 20px 0;
+      background: #161b22;
+      padding: 20px 25px;
+      border-radius: 0;
+      box-shadow: 0 15px 40px #0008;
+    }
+
+    h1 {
+      text-align: center;
+      margin-bottom: 15px;
+      color: #c9d1d9;
+    }
+
+    #search {
+      width: 100%;
+      padding: 10px;
+      border-radius: 8px;
+      border: 1px solid #30363d;
+      background: #0e1117;
+      color: #fff;
+      margin-bottom: 20px;
+      font-size: 1em;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.95em;
+    }
+
+    th,
+    td {
+      padding: 12px;
+      border-bottom: 1px solid #30363d;
+      text-align: left;
+      vertical-align: middle;
+    }
+
+    th {
+      background: #1f262e;
+      color: #c9d1d9;
+    }
+
+    tr:hover {
+      background: #222a36;
+    }
+
+    button {
+      border: none;
+      border-radius: 6px;
+      padding: 6px 12px;
+      cursor: pointer;
+      font-weight: bold;
+      font-size: 0.85em;
+      transition: 0.2s;
+    }
+
+    button.danger {
+      background: #da3633;
+      color: white;
+    }
+
+    button.danger:hover {
+      background: #ff4c42;
+    }
+
+    button.normal {
+      background: #238636;
+      color: white;
+    }
+
+    button.normal:hover {
+      background: #2ea043;
+    }
+
+    .profile-icon {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      margin-right: 8px;
+      vertical-align: middle;
+    }
+
+    .rank {
+      font-weight: bold;
+      color: #58a6ff;
+    }
+
+    @media(max-width:600px) {
+      #adminApp {
+        padding: 15px;
+      }
+
+      th,
+      td {
+        padding: 8px;
+        font-size: 0.85em;
+      }
+
+      nav h3 {
+        font-size: 1.2em;
+      }
+
+      .profile-icon {
+        width: 30px;
+        height: 30px;
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+  <nav>
+    <div id='nav-left'>
+
+    </div>
+    <div id="nav-right">
+      <button onclick="window.location.href='./games.html?admin=True'"
+        style="background: transparent; border: 1px solid #58a6ff; color: #58a6ff; padding: 5px 15px; border-radius: 6px; cursor: pointer; font-weight: 600; margin-right: 15px;">Exit</button>
+      <img src="images/panic.png" alt="Panic" title="Panic Button"
+        onclick="window.location.href='https://classroom.google.com'">
+      <img src="images/chat.png" alt="Chat" title="Chat"
+        onclick="window.location.href='https://lolfactor39.github.io/chat/'">
+      <h3 id="home-button" style="cursor: pointer;" onclick="window.location.href='./settings.html'" title="Home">
+        Settings</h3>
+    </div>
+  </nav>
+
+  <div id="adminApp">
+    <h1>Admin Control Panel</h1>
+    <input id="search" placeholder="Search by email...">
+    <table>
+      <thead>
+        <tr>
+          <th>#</th>
+          <th>Profile</th>
+          <th>Email</th>
+          <th>Role</th>
+          <th>Name</th>
+          <th>Time Spent</th>
+          <th> Created </th>
+          <th>Online</th>
+          <th>Leaderboard Ban</th>
+          <th>Controls</th>
+        </tr>
+      </thead>
+      <tbody id="adminTable"></tbody>
+    </table>
+
+    <div style="margin-top: 40px;">
+      <h2 style="color: #c9d1d9; margin-bottom: 15px;">Recent Activity Logs (Last 10)</h2>
+      <div id="activityLog"
+        style="background: #0e1117; border: 1px solid #30363d; border-radius: 8px; padding: 15px; max-height: 400px; overflow-y: auto;">
+        <div style="color: #72767d; text-align: center;">Loading activity...</div>
+      </div>
+    </div>
+  </div>
+  <div id="not-admin" style="display: none;">
+    <h2>Access Denied</h2>
+    <p>You must be logged in as an administrator to access this page.</p>
+    <p><a href="games.html?admin=False">← Back to Games</a></p>
+  </div>
+  <script src="./js/user.js"></script>
+  <script src="./js/antiblock.js"></script>
+  <script>
+    /* ===== CONFIG ===== */
+    const OWNER_EMAIL = ["advikmurthy12@gmail.com", "664904@stu.sandi.net", "631129@stu.sandi.net"].map(e => e.toLowerCase());
+
+    const table = document.getElementById("adminTable");
+    const search = document.getElementById("search");
+    const navLeft = document.getElementById("nav-left");
+    const navRight = document.getElementById("nav-right");
+    const adminContent = document.getElementById('adminApp');
+    const notAdmin = document.getElementById('not-admin');
+
+    let cache = {};
+
+    /* ===== NAV ===== */
+    function createNavTitle(text, href) {
+      const h3 = document.createElement("h3");
+      h3.textContent = text;
+      h3.onclick = () => location.href = href;
+      return h3;
+    }
+
+    // Verify admin status from database - CRITICAL FOR SECURITY
+    auth.onAuthStateChanged(async user => {
+      if (!user) {
+        window.location.replace("./games.html");
+        return;
+      }
+      
+      const isAdminUser = await checkUserAdminStatus(user.uid);
+      
+      if (isAdminUser) {
+        navLeft.appendChild(createNavTitle("Gammer HUBS - Admin", "./games.html?admin=True"));
+        navRight.appendChild(createNavTitle("Leaderboard", "./leaderboard.html?frees=true"));
+        console.log("Admin access verified from database");
+      } else {
+        alert("You do not have admin access to view this page.");
+        window.location.replace("./games.html");
+      }
+    });
+    
+    function onUserChange(callback) {
+      firebase.auth().onAuthStateChanged(user => {
+        if (user) {
+          db.ref(`users/${user.uid}`).once('value').then(snap => {
+            callback(snap.val());
+          });
+        } else {
+          callback(null);
+        }
+      });
+    }
+
+    // Check authentication and admin role
+    onUserChange(profile => {
+      loading.style.display = 'none';
+      if (profile && profile.role === 'admin') {
+        adminContent.style.display = 'block';
+        notAdmin.style.display = 'none';
+
+        // Load current message
+        db.ref('info/message').once('value').then(snap => {
+          if (snap.exists()) {
+            document.getElementById('message-text').value = snap.val();
+          }
+        });
+      } else {
+        adminContent.style.display = 'none';
+        notAdmin.style.display = 'block';
+      }
+    });
+
+    /* ===== FIREBASE LISTENER ===== */
+    console.log("Setting up Firebase listener in adtable.html");
+    firebase.database().ref("users").on("value", snap => {
+      console.log("Got firebase data:", snap.val());
+      cache = snap.val() || {};
+      renderTable();
+    });
+
+    function loadActivityLog() {
+      firebase.database().ref('activity').orderByChild('timestamp').limitToLast(10).on('value', snap => {
+        const activities = snap.val() || {};
+        const logContainer = document.getElementById("activityLog");
+        const activityArray = Object.entries(activities)
+          .map(([id, data]) => ({ id, ...data }))
+          .sort((a, b) => b.timestamp - a.timestamp);
+
+        if (activityArray.length === 0) {
+          logContainer.innerHTML = '<div style="color: #72767d; text-align: center;">No activity yet</div>';
+          return;
+        }
+
+        logContainer.innerHTML = activityArray.map(activity => `
+          <div style="padding: 10px; border-bottom: 1px solid #30363d; font-size: 14px;">
+            <div style="display: flex; justify-content: space-between; margin-bottom: 4px;">
+              <strong style="color: #58a6ff;">${activity.userName || 'User'}</strong>
+              <small style="color: #72767d;">${new Date(activity.timestamp).toLocaleString()}</small>
+            </div>
+            <div style="color: #c9d1d9;">${activity.action}</div>
+          </div>
+        `).join('');
+      });
+    }
+    loadActivityLog();
+
+    search.oninput = renderTable;
+
+    /* ===== RENDER TABLE ===== */
+    function renderTable() {
+      const q = search.value.toLowerCase();
+      table.innerHTML = "";
+
+      Object.entries(cache)
+        .filter(([_, u]) => (u.email || "").toLowerCase().includes(q))
+        .sort((a, b) => (b[1].timeSpent || 0) - (a[1].timeSpent || 0))
+        .forEach(([uid, u], i) => {
+          const isOwner = OWNER_EMAIL.includes((u.email || "").toLowerCase());
+          const seconds = u.timeSpent || 0;
+          const h = Math.floor(seconds / 3600);
+          const m = Math.floor(seconds % 3600 / 60);
+          const s = seconds % 60;
+
+          const row = document.createElement("tr");
+          row.innerHTML = `
+        <td class="rank">#${i + 1}</td>
+        <td><img class="profile-icon" src="${u.icon || 'https://i.imgur.com/0y8Ftya.png'}"></td>
+        <td>${u.email || "N/A"}</td>
+        <td>${u.role || "user"}${isOwner ? " (Owner)" : ""}</td>
+        <td>${u.name || "N/A"}</td>
+        <td>${h.toString().padStart(2, '0')}:${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}</td>
+        <td>${new Date(u.created || 0).toLocaleDateString()}</td>
+        <td>${u.online ? "Yes" : "No"}</td>
+        <td>
+          <button class="${u.banned ? 'danger' : 'normal'}" data-action="leaderboard" data-uid="${uid}" ${isOwner ? "disabled" : ""}>
+            ${u.banned ? 'Unban' : 'Ban'}
+          </button>
+        </td>
+        <td>
+          <button class="danger" data-action="ban" data-uid="${uid}" ${isOwner ? "disabled" : ""}>Ban</button>
+          <button class="normal" data-action="unban" data-uid="${uid}" ${isOwner ? "disabled" : ""}>Unban</button>
+          <button class="normal" data-action="admin" data-uid="${uid}" ${isOwner ? "disabled" : ""}>Make Admin</button>
+          <button class="danger" data-action="clearUserMsgs" data-uid="${uid}" ${isOwner ? "disabled" : ""}>Clear Messages</button>
+        </td>
+      `;
+          table.appendChild(row);
+        });
+    }
+
+    /* ===== BUTTON HANDLER ===== */
+    table.onclick = e => {
+      const btn = e.target.closest("button");
+      if (!btn) return;
+
+      const uid = btn.dataset.uid;
+      const user = cache[uid];
+      if (!user) return;
+
+      if (OWNER_EMAIL.includes((user.email || "").toLowerCase())) return;
+
+      if (btn.dataset.action === "ban") {
+        editUserProp(uid, "role", "blocked");
+        firebase.database().ref('banned/' + uid).set({ bannedAt: Date.now(), bannedBy: 'Admin' });
+      }
+      if (btn.dataset.action === "unban") {
+        editUserProp(uid, "role", "user");
+        firebase.database().ref('banned/' + uid).remove();
+      }
+      if (btn.dataset.action === "admin") editUserProp(uid, "role", "admin");
+      if (btn.dataset.action === "leaderboard") editUserProp(uid, "banned", !user.banned);
+      if (btn.dataset.action === "delete") {
+        if (confirm(`Are you sure you want to PERMANENTLY delete the account for ${user.email}? This cannot be undone.`)) {
+          firebase.database().ref("users/" + uid).remove();
+          firebase.database().ref("banned/" + uid).remove();
+        }
+      }
+      if (btn.dataset.action === "clearUserMsgs") {
+        if (confirm(`Clear ALL messages sent by ${user.name || user.email} across all channels?`)) {
+          firebase.database().ref('chat').once('value', snap => {
+            const servers = snap.val() || {};
+            Object.keys(servers).forEach(server => {
+              Object.keys(servers[server]).forEach(channel => {
+                const msgs = servers[server][channel];
+                Object.keys(msgs).forEach(msgId => {
+                  if (msgs[msgId].userId === uid) {
+                    firebase.database().ref(`chat/${server}/${channel}/${msgId}`).remove();
+                  }
+                });
+              });
+            });
+            alert("Messages cleared!");
+          });
+        }
+      }
+    };
+  </script>
+
+</body>
+
+</html>

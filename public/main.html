@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="referrer" content="no-referrer">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+    <script src="./js/configstuff.js"></script>
+    <script src="./js/user.js"></script>
+    <script src="./js/uttils.js"></script>
+    <script src="./js/settings-loader.js"></script>
+    <script>
+        window.onload = function() {
+            window.trackUser();
+            window.trackUserOnlineStatus();
+        };
+    </script>
+    <link rel="stylesheet" href="css/style.css">
+    <style>
+      body.main-centered {
+        min-height: 100vh;
+        padding: 20px;
+        padding-top: 90px;
+        box-sizing: border-box;
+      }
+      body.main-centered #search-section {
+        min-height: calc(100vh - 140px);
+        margin-top: 0;
+        padding-top: 0;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+      }
+      body.main-centered #universal-banner {
+        margin-top: 16px;
+        margin-bottom: 0;
+      }
+    </style>
+</head>
+<body class="main-centered">
+  <nav>
+    <div id='nav-left'></div>
+    <div id="nav-right">
+      <button id="grid-toggle" onclick="document.body.classList.toggle('grid-view')">Toggle Grid/List View</button>
+      <img src="images/panic.png" alt="Panic Button" id="panic-button"
+        onclick="window.location.href='https://classroom.google.com'" title="Panic Button - Go to Google">
+      <img src="images/chat.png" alt="Chat" id="chat-button" onclick="window.location.href='./chats.html'"
+        title="Chat with friends like discord!">
+      <h3 style="cursor: pointer;" onclick="window.location.href='https://mhctalkservers.pages.dev/'" title="Chat with friends">Chat</h3>
+      <h3 id="prxy-button" style="cursor: pointer;" onclick="window.openProxyFromGames && window.openProxyFromGames()"
+        title="Search the web and open sites">Browse</h3>
+      <h3 id="home-button" style="cursor: pointer;" onclick="window.location.href='./settings.html'" title="Home">
+        Settings</h3>
+      <h3 style="cursor:pointer;" onclick="window.location.href = './about.html'" title="About Me">
+        About Me
+      </h3>
+    </div>
+  </nav>
+
+  <script src="js/antiblock.js"></script>
+  <script>
+    const admin     = new URLSearchParams(window.location.search).get('admin');
+    const accescode = new URLSearchParams(window.location.search).get('free');
+    const navLeft   = document.getElementById('nav-left');
+    const navRight  = document.getElementById('nav-right');
+
+    function createNavTitle(text, href) {
+      const h3 = document.createElement('h3');
+      h3.textContent = text;
+      h3.style.cursor = 'pointer';
+      h3.onclick = () => window.location.href = href;
+      return h3;
+    }
+
+    if (admin === 'True') {
+      // CRITICAL: Verify admin status from database, never trust URL parameter alone
+      firebase.auth().onAuthStateChanged(async user => {
+        if (!user) return;
+        try {
+          const snap     = await window.db.ref(`users/${user.uid}/role`).once("value");
+          const userRole = snap.val();
+
+          if (userRole === "admin") {
+            navLeft.appendChild(createNavTitle('Gamer Hubs - Admin', './main.html?admin=True'));
+            navRight.appendChild(createNavTitle('Games', './games.html?admin=True'));
+            navRight.appendChild(createNavTitle('Admin Table', './adtable.html'));
+            navRight.appendChild(createNavTitle('Admin Panel', './admin.html'));
+            navRight.appendChild(createNavTitle('Leaderboard', './leaderboard.html?admin=True'));
+            document.title = 'Gamer Hubs - Admin';
+            const uids = sessionStorage.getItem('uid');
+            window.trackUser(uids);
+            window.trackUserOnlineStatus(uids);
+            if (window.initializeAdminStatus) window.initializeAdminStatus();
+          } else {
+            window.location.replace('./main.html?admin=False');
+            console.log("Hacker stop doing ts I known its you Krupal");
+          }
+        } catch (err) {
+          console.error("Error verifying admin status:", err);
+          window.location.replace('./main.html?admin=False');
+        }
+      });
+    } else if (accescode === 'True') {
+      navLeft.appendChild(createNavTitle('Gamer HUBS - Free Enabled ', './main.html?free=True'));
+      navRight.appendChild(createNavTitle('Games ', './games.html?free=True'));
+      document.title = 'Gamer Hubs - Free Access';
+      sessionStorage.setItem('freeAccess', 'true');
+      sessionStorage.setItem("userroleis", "freeuser");
+    } else {
+      navLeft.appendChild(createNavTitle('Gamer HUBS', './main.html'));
+      navRight.appendChild(createNavTitle('Games', './games.html'));
+      document.title = 'Studying';
+      const uids = sessionStorage.getItem('uid');
+      console.log(uids);
+      sessionStorage.setItem("userroleis", "user");
+      window.trackUserOnlineStatus(uids);
+      window.trackUser(uids);
+    }
+  </script>
+
+  <!-- Universal Message Banner -->
+  <div id="universal-banner"
+    style="display: none; background: #f44336; color: #fff; padding: 30px 40px; text-align: center; width: 100%; height: 20vh; border-bottom: 5px solid #d32f2f; box-shadow: 0 6px 20px rgba(0,0,0,0.4); font-size: 24px; font-weight: bold; position: relative; margin-bottom: 20px;">
+    <span id="banner-text"
+      style="display: block; width: 100%; height: 100%; display: flex; align-items: center; justify-content: center;"></span>
+  </div>
+
+  <div id="search-section">
+    <div style="width: 100%; max-width: 980px; display: flex; flex-direction: column; align-items: center; gap: 16px; padding: 10px 20px;">
+      <h2 style="font-size: 36px; font-weight: 700; text-align: center;">Search and explore the web</h2>
+      <form id="main-search-form" style="width: 100%; display: flex; gap: 10px; align-items: center; justify-content: center; flex-wrap: wrap;">
+        <input
+          id="main-search-input"
+          type="text"
+          placeholder="Search the web for a URL or a question"
+          autocomplete="off"
+          autocorrect="off"
+          spellcheck="false"
+          style="flex: 1 1 560px; min-width: 260px; max-width: 700px; padding: 16px 24px; font-size: 18px; border: 2px solid #555555; border-radius: 12px; background-color: #222222; color: #ffffff; outline: none;"
+        >
+        <select id="main-search-engine" style="padding: 16px 18px; font-size: 16px; border-radius: 12px; border: 2px solid #555555; background-color: #222222; color: #ffffff; min-width: 170px;">
+          <option value="google">Google</option>
+          <option value="duckduckgo">DuckDuckGo</option>
+          <option value="bing">Bing</option>
+          <option value="brave">Brave</option>
+        </select>
+      </form>
+    </div>
+    <div id="online-users" style="font-size: 20px; font-weight: bold; margin: 10px 0; text-align: center;">
+      USERS ONLINE:
+    </div>
+  </div>
+
+  <div style="position: fixed; left: 12px; bottom: 10px; font-size: 14px; color: #9aa4ad; opacity: 0.95; z-index: 220;">
+    credit scramjet
+  </div>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      const banner     = document.getElementById('universal-banner');
+      const bannerText = document.getElementById('banner-text');
+
+      if (!banner || !bannerText) {
+        console.error('Banner elements not found');
+        return;
+      }
+      if (!window.db) {
+        console.error('Firebase db not available!');
+        return;
+      }
+
+      let lastMessageSeen = localStorage.getItem('LastbannerShown');
+
+      window.db.ref('info/message').on('value', (snapshot) => {
+        const currentMessage = snapshot.val();
+        if (currentMessage && currentMessage !== lastMessageSeen) {
+          bannerText.textContent = currentMessage;
+          banner.style.display = 'block';
+          localStorage.setItem('LastbannerShown', currentMessage);
+          lastMessageSeen = currentMessage;
+          setTimeout(() => { banner.style.display = 'none'; }, 30000);
+        } else {
+          banner.style.display = 'none';
+        }
+      }, (error) => {
+        console.error('Firebase error:', error);
+      });
+    });
+  </script>
+
+  <script>
+    const SEARCH_ENGINE_MAP = {
+      google:    "https://www.google.com/search?q=%s",
+      duckduckgo:"https://duckduckgo.com/?q=%s",
+      bing:      "https://www.bing.com/search?q=%s",
+      brave:     "https://search.brave.com/search?q=%s",
+    };
+
+    function toSearchOrUrl(input, engine) {
+      const value = (input || "").trim();
+      if (!value) return null;
+      try { return new URL(value).toString(); } catch (e) {}
+      try {
+        const u = new URL(`https://${value}`);
+        if (!value.includes(" ") && u.hostname.includes(".")) return u.toString();
+      } catch (e) {}
+      const template = SEARCH_ENGINE_MAP[engine] || SEARCH_ENGINE_MAP.google;
+      return template.replace("%s", encodeURIComponent(value));
+    }
+
+    function openActiveWithLink(targetUrl) {
+      const returnTo = `${window.location.pathname}${window.location.search}${window.location.hash}`;
+      const params = new URLSearchParams();
+      params.set("returnTo", returnTo);
+      params.set("q", targetUrl);
+      window.location.href = `/a?${params.toString()}`;
+    }
+
+    window.openProxyFromGames = function (injectUrl) {
+      if (injectUrl) {
+        openActiveWithLink(injectUrl);
+        return;
+      }
+      window.location.href = `/a?returnTo=${encodeURIComponent(
+        `${window.location.pathname}${window.location.search}${window.location.hash}`
+      )}`;
+    };
+
+    window.getPeopleCount = function () {
+      return window.db
+        .ref("users")
+        .orderByChild("online")
+        .equalTo(true)
+        .once("value")
+        .then((snap) => snap.numChildren());
+    };
+
+    async function updateOnlineUsers() {
+      const onlineEl = document.getElementById("online-users");
+      if (!onlineEl) return;
+      try {
+        const count = await window.getPeopleCount();
+        onlineEl.textContent = `USERS ONLINE: ${count}`;
+      } catch (err) {
+        console.error("Failed to get online users:", err);
+        onlineEl.textContent = `USERS ONLINE: ?`;
+      }
+    }
+    document.addEventListener("DOMContentLoaded", () => {
+      updateOnlineUsers();
+      setInterval(updateOnlineUsers, 10000);
+      sessionStorage.setItem(
+        'activeReturnUrl',
+        `${window.location.pathname}${window.location.search}${window.location.hash}`
+      );
+    });
+
+    const mainSearchForm = document.getElementById("main-search-form");
+    if (mainSearchForm) {
+      mainSearchForm.addEventListener("submit", (e) => {
+        e.preventDefault();
+        const searchInput  = document.getElementById("main-search-input");
+        const searchEngine = document.getElementById("main-search-engine");
+        const targetUrl    = toSearchOrUrl(searchInput?.value, searchEngine?.value);
+        if (!targetUrl) return;
+        openActiveWithLink(targetUrl);
+      });
+    }
+  </script>
+</body>
+</html>

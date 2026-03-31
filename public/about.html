@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8" />
+  <meta name="referrer" content="no-referrer" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Settings Panel — PowerSchool Style</title>
+
+  <style>
+    :root {
+      --nav-h: 70px;
+      --gap: 16px;
+      --card-bg: #12121a;
+      --page-bg: #0e1117;
+      --accent: #4f7cff;
+      --muted: #aaa;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial;
+    }
+
+    body {
+      background: var(--page-bg) center/cover no-repeat fixed;
+      color: #e6edf3;
+      min-height: 100vh;
+      height: 100vh;
+      overflow: hidden;
+      padding-top: var(--nav-h);
+    }
+
+    /* NAVBAR */
+    nav {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: var(--nav-h);
+      background: #161b22;
+      border-bottom: 1px solid #30363d;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 10px 20px;
+      z-index: 200;
+    }
+
+    #nav-left {
+      display: flex;
+      gap: 12px;
+      align-items: center;
+    }
+
+    #nav-right {
+      display: flex;
+      gap: 12px;
+      align-items: center;
+    }
+
+    nav img {
+      height: 32px;
+      cursor: pointer;
+      margin-left: 12px;
+    }
+
+    nav h3 {
+      font-size: 1rem;
+      color: #fff;
+      cursor: pointer;
+      transition: color 0.2s;
+    }
+
+    nav h3:hover {
+      color: #4f7cff;
+    }
+
+    /* hover accent color */
+    nav button {
+      background: #238636;
+      color: white;
+      border: none;
+      padding: 6px 12px;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 14px;
+    }
+
+    nav button:hover {
+      background: #2ea043;
+    }
+
+    /* FULLSCREEN ABOUT ME CARD */
+    .about-card {
+      position: absolute;
+      top: var(--nav-h);
+      left: 0;
+      width: 100%;
+      height: calc(100vh - var(--nav-h));
+      background: var(--card-bg);
+      border-radius: 30px;
+      /* large round corners */
+      margin: 0;
+      padding: 40px;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 30px;
+      text-align: center;
+    }
+
+    /* Header: GAMER HUBS + image */
+    .about-header {
+      display: flex;
+      align-items: center;
+      gap: 20px;
+    }
+
+    .about-header h1 {
+      font-size: 3rem;
+      color: #4f7cff;
+      margin: 0;
+    }
+
+    .about-header img {
+      height: 60px;
+      width: 60px;
+      object-fit: contain;
+      border-radius: 12px;
+    }
+
+    .about-card p {
+      font-size: 1.1rem;
+      color: #e6edf3;
+      line-height: 1.6;
+      max-width: 800px;
+    }
+
+    @media(max-width:700px) {
+      .about-card {
+        padding: 20px;
+        gap: 20px;
+      }
+
+      .about-header h1 {
+        font-size: 2rem;
+      }
+
+      .about-header img {
+        height: 50px;
+        width: 50px;
+      }
+
+      .about-card p {
+        font-size: 1rem;
+      }
+    }
+  </style>
+
+</head>
+
+<body>
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+  <script src="js/configstuff.js"></script>
+  <script src="js/user.js"></script>
+  <script src="js/antiblock.js"></script>
+  <script src="js/settings-loader.js"></script>
+  <script>
+    let uids = sessionStorage.getItem('uid');
+    trackUser(uids);
+    trackUserOnlineStatus(uids);
+  </script>
+  <nav>
+    <div id='nav-left'>
+
+    </div>
+    <div id="nav-right">
+      <button id="grid-toggle" onclick="document.body.classList.toggle('grid-view')">Toggle Grid/List View</button>
+
+      <img src="images/panic.png" alt="Panic Button" id="panic-button"
+        onclick="window.location.href='https://classroom.google.com'" title="Panic Button - Go to Google">
+      <img src="images/chat.png" alt="Chat" id="chat-button"
+        onclick="window.location.href='https://lolfactor39.github.io/chat/'" title="Chat with firends like discord!">
+      <h3 id="home-button" style="cursor: pointer;" onclick="window.location.href='./settings.html'" title="Home">
+        Settings</h3>
+      <h3 style="cursor:pointer;" onclick="window.location.href = './about.html'" title="About Me">
+        About Me
+      </h3>
+    </div>
+  </nav>
+
+  <section class="about-card">
+    <!-- Header with text and image -->
+    <div class="about-header">
+      <h1>GAMER HUBS</h1>
+      <img src="images/stubott.png" alt="Stubott">
+    </div>
+
+    <!-- About Me text -->
+    <p>
+      Hello! Gamer Hubs is a website where you can play games even if schools try to block them.
+      Gamer Hubs was made by <strong>Advik Murthy</strong>, 9 years old, in 4th grade at Elementary School.
+      I love Minecraft and other games. I also love coding and learning computer science!
+    </p>
+  </section>
+
+  <script>
+    // Dynamic navbar based on roles
+    const navLeft = document.getElementById('nav-left');
+    const navRight = document.getElementById('nav-right');
+    function createNavItem(text, href) {
+      const span = document.createElement('span');
+      span.textContent = text; span.style.marginRight = '12px';
+      span.style.cursor = 'pointer'; span.onclick = () => window.location.href = href;
+      span.onmouseover = () => span.style.color = '#4f7cff';
+      span.onmouseout = () => span.style.color = 'inherit';
+      return span;
+    }
+
+    let isAdmin = sessionStorage.getItem('isAdmin') === 'true';
+    let freeAccess = sessionStorage.getItem('freeAccess') === 'true';
+
+    if (isAdmin) {
+      navLeft.appendChild(createNavItem('Gamer HUBS - Admin', './games.html?admin=True'));
+      navRight.appendChild(createNavItem('Admin Table', './adtable.html'));
+      navRight.appendChild(createNavItem('Leaderboard', './leaderboard.html?admin=True'));
+    } else if (freeAccess) {
+      navLeft.appendChild(createNavItem('Gamer HUBS - Free', './games.html?free=True'));
+    } else {
+      navLeft.appendChild(createNavItem('Gamer HUBS', './games.html'));
+    }
+  </script>
+
+</body>
+
+</html>

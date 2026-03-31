@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Lost</title>
+
+<style>
+html, body {
+  margin: 0;
+  padding: 0;
+  width: 100%;
+  height: 100%;
+  background-color: #000 !important;
+  color: #fff;
+  font-family: system-ui, sans-serif;
+}
+
+body {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+}
+
+#get_back {
+  background: linear-gradient(90deg, #4f8cff 0%, #6a5af9 100%);
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  padding: 8px 18px;
+  font-size: 1em;
+  cursor: pointer;
+  box-shadow: 0 2px 8px rgba(76, 110, 245, 0.15);
+  transition: background 0.2s, transform 0.2s;
+}
+
+#get_back:hover {
+  background: linear-gradient(90deg, #6a5af9 0%, #4f8cff 100%);
+  transform: scale(1.05);
+}
+</style>
+</head>
+
+<body>
+  <img src="images/stubott.png" alt="Lost illustration">
+  <h3>Oops, you got lost. Get back.</h3>
+  <button id="get_back" onclick="window.location.href='/'">
+    Get back
+  </button>
+</body>
+</html>

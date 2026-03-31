@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Scramjet Loader Test</title>
+  <style>
+    body { 
+      font-family: system-ui, sans-serif; 
+      background: #111; 
+      color: #eee; 
+      display: flex; 
+      flex-direction: column; 
+      align-items: center; 
+      justify-content: center; 
+      height: 100vh; 
+    }
+    .log { margin: 4px 0; }
+    .success { color: #0f0; }
+    .fail { color: #f33; }
+  </style>
+</head>
+<body>
+  <h1>Scramjet File Loader Test</h1>
+  <div id="output"></div>
+
+  <script>
+    const output = document.getElementById("output");
+    function log(msg, success = true) {
+      const div = document.createElement("div");
+      div.className = 'log ' + (success ? 'success' : 'fail');
+      div.textContent = msg;
+      output.appendChild(div);
+      console.log(msg);
+    }
+
+    const files = [
+      "/scramjet/scramjet.codecs.js",
+      "/scramjet/scramjet.config.js",
+      "/scramjet/scramjet.bundle.js"
+    ];
+
+    async function testFile(url) {
+      try {
+        const res = await fetch(url, { cache: "no-cache" });
+        if (!res.ok) throw new Error(res.status + " " + res.statusText);
+        const text = await res.text();
+        if (text.length > 0) {
+          log(`✅ Loaded ${url} (${text.length} bytes)`);
+        } else {
+          log(`⚠️ Loaded ${url} but empty`, false);
+        }
+      } catch (err) {
+        log(`❌ Failed to load ${url}: ${err.message}`, false);
+      }
+    }
+
+    async function runTest() {
+      log("Starting Scramjet file load test...");
+      for (const f of files) {
+        await testFile(f);
+      }
+
+      // Quick check if Scramjet global config exists
+      if (self.__scramjet$config) {
+        log("✅ Found global __scramjet$config object");
+      } else {
+        log("⚠️ __scramjet$config not defined yet. Make sure <script> tags are loaded correctly.", false);
+      }
+    }
+
+    runTest();
+  </script>
+
+  <!-- Load Scramjet files normally -->
+  <script src="/scramjet/scramjet.codecs.js" defer></script>
+  <script src="/scramjet/scramjet.config.js" defer></script>
+  <script src="/scramjet/scramjet.bundle.js" defer></script>
+
+</body>
+</html>

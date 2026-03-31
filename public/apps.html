@@ -1,0 +1,378 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gamer Hubs - Apps</title>
+    <link rel="stylesheet" href="css/style.css">
+    <style>
+        /* Reusing style.css but adding specific overrides if needed */
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding-top: 70px;
+            background: linear-gradient(to bottom right, #f7f7f7, #e0e6f0);
+            color: #333;
+        }
+
+        .no-cursor-pointer {
+            cursor: default;
+        }
+
+        /* Category Headers */
+        .category-header {
+            width: 100%;
+            padding: 15px 20px;
+            margin-top: 20px;
+            border-bottom: 2px solid #3b82f6;
+            color: #3b82f6;
+            font-size: 24px;
+            font-weight: bold;
+            grid-column: 1 / -1;
+            /* Span full width of grid */
+        }
+
+        /* Search Section */
+        #search-section {
+            text-align: center;
+            padding: 20px;
+            background: rgba(255, 255, 255, 0.8);
+            margin-bottom: 20px;
+        }
+
+        #app-search {
+            width: 60%;
+            max-width: 500px;
+            padding: 12px;
+            font-size: 18px;
+            border: 1px solid #ccc;
+            border-radius: 25px;
+            outline: none;
+            transition: 0.3s;
+        }
+
+        #app-search:focus {
+            box-shadow: 0 0 10px rgba(59, 130, 246, 0.5);
+            border-color: #3b82f6;
+        }
+
+        /* Grid */
+        #itemList {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+            gap: 20px;
+            padding: 20px;
+            list-style: none;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        /* App Items */
+        #itemList li {
+            background: white;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            transition: transform 0.2s, box-shadow 0.2s;
+            cursor: pointer;
+            height: 180px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            border: 1px solid rgba(0, 0, 0, 0.05);
+        }
+
+        #itemList li:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 15px rgba(0, 0, 0, 0.15);
+        }
+
+        .thumb {
+            width: 80px;
+            height: 80px;
+            background-size: cover;
+            background-position: center;
+            border-radius: 15px;
+            margin-bottom: 15px;
+            background-color: #f0f0f0;
+        }
+
+        .text-overlay {
+            font-weight: 600;
+            font-size: 16px;
+            padding: 0 10px;
+            color: #444;
+        }
+
+        /* Navigation Buttons */
+        nav {
+            background: #161b22;
+            padding: 10px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 100;
+            border-bottom: 1px solid #30363d;
+        }
+
+        nav h3 {
+            margin: 0;
+            font-size: 1.5em;
+            color: #fff;
+            cursor: pointer;
+        }
+
+        nav img {
+            height: 32px;
+            cursor: pointer;
+            margin-left: 12px;
+        }
+
+        nav button {
+            background: #238636;
+            color: white;
+            border: none;
+            padding: 6px 12px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+
+        nav button:hover {
+            background: #2ea043;
+        }
+
+        margin-left: 20px;
+        padding: 5px 10px;
+        border-radius: 5px;
+        transition: background 0.2s;
+        display: inline-block;
+        }
+
+        #nav-right button:hover,
+        #nav-right h3:hover {
+            background: rgba(255, 255, 255, 0.2);
+        }
+    </style>
+    <script src="js/settings-loader.js"></script>
+</head>
+
+<body>
+
+    <nav>
+        <div id='nav-left'>
+
+        </div>
+        <div id="nav-right">
+            <button id="grid-toggle" onclick="document.body.classList.toggle('grid-view')">Toggle Grid/List
+                View</button>
+
+            <img src="images/panic.png" alt="Panic Button" id="panic-button"
+                onclick="window.location.href='https://classroom.google.com'" title="Panic Button - Go to Google">
+            <img src="images/chat.png" alt="Chat" id="chat-button"
+                onclick="window.location.href='https://lolfactor39.github.io/chat/'"
+                title="Chat with firends like discord!">
+            <h3 id="home-button" style="cursor: pointer;" onclick="window.location.href='./settings.html'" title="Home">
+                Settings</h3>
+            <h3 style="cursor:pointer;" onclick="window.location.href = './about.html'" title="About Me">
+                About Me
+            </h3>
+        </div>
+    </nav>
+
+    <div id="search-section">
+        <h1 style="color:#333; margin-bottom:10px;">Apps Library</h1>
+        <input type="text" id="app-search" placeholder="Search apps (e.g. Discord, AI, Math)...">
+    </div>
+
+    <ul id="itemList">
+        <!-- Categories will be injected or structured here -->
+
+        <!-- === GAMING & CLOUD === -->
+        <div class="category-header">Gaming & Cloud</div>
+
+        <li onclick="openProxy('https://play.geforcenow.com')">
+            <div class="thumb"
+                style="background-image: url('https://icons.duckduckgo.com/ip3/play.geforcenow.com.ico'); background-size: contain; background-repeat: no-repeat;">
+            </div>
+            <div class="text-overlay">GeForce Now</div>
+        </li>
+        <li onclick="openProxy('https://www.crazygames.com')">
+            <div class="thumb"
+                style="background-image: url('https://icons.duckduckgo.com/ip3/crazygames.com.ico'); background-size: contain; background-repeat: no-repeat;">
+            </div>
+            <div class="text-overlay">CrazyGames</div>
+        </li>
+        <li onclick="openProxy('https://now.gg/roblox')">
+            <div class="thumb"
+                style="background-image: url('https://icons.duckduckgo.com/ip3/now.gg.ico'); background-size: contain; background-repeat: no-repeat;">
+            </div>
+            <div class="text-overlay">Roblox (Now.gg)</div>
+        </li>
+        <li onclick="openProxy('https://poki.com')">
+            <div class="thumb"
+                style="background-image: url('https://icons.duckduckgo.com/ip3/poki.com.ico'); background-size: contain; background-repeat: no-repeat;">
+            </div>
+            <div class="text-overlay">Poki</div>
+        </li>
+
+        <!-- === STREAMING === -->
+        <div class="category-header">Streaming</div>
+
+        <li onclick="openProxy('https://www.youtube.com/?hl=en')">
+            <div class="thumb"
+                style="background-image: url('https://icons.duckduckgo.com/ip3/youtube.com.ico'); background-size: contain; background-repeat: no-repeat;">
+            </div>
+            <div class="text-overlay">YouTube</div>
+        </li>
+        <li onclick="openProxy('https://www.twitch.tv')">
+            <div class="thumb"
+                style="background-image: url('https://icons.duckduckgo.com/ip3/twitch.tv.ico'); background-size: contain; background-repeat: no-repeat;">
+            </div>
+            <div class="text-overlay">Twitch</div>
+        </li>
+        <li onclick="openProxy('https://open.spotify.com')">
+            <div class="thumb"
+                style="background-image: url('https://icons.duckduckgo.com/ip3/spotify.com.ico'); background-size: contain; background-repeat: no-repeat;">
+            </div>
+            <div class="text-overlay">Spotify</div>
+        </li>
+        <li onclick="openProxy('https://soundcloud.com')">
+            <div class="thumb"
+                style="background-image: url('https://icons.duckduckgo.com/ip3/soundcloud.com.ico'); background-size: contain; background-repeat: no-repeat;">
+            </div>
+            <div class="text-overlay">SoundCloud</div>
+        </li>
+
+        <!-- === AI & SOLVERS === -->
+        <div class="category-header">AI & School Solvers (Free)</div>
+
+        <li onclick="openProxy('https://www.blackbox.ai')">
+            <div class="thumb"
+                style="background-image: url('https://icons.duckduckgo.com/ip3/blackbox.ai.ico'); background-size: contain; background-repeat: no-repeat;">
+            </div>
+            <div class="text-overlay">Blackbox AI</div>
+        </li>
+        <li onclick="openProxy('https://huggingface.co/chat/')">
+            <div class="thumb"
+                style="background-image: url('https://icons.duckduckgo.com/ip3/huggingface.co.ico'); background-size: contain; background-repeat: no-repeat;">
+            </div>
+            <div class="text-overlay">HuggingChat</div>
+        </li>
+        <li onclick="openProxy('https://www.wolframalpha.com')">
+            <div class="thumb"
+                style="background-image: url('https://icons.duckduckgo.com/ip3/wolframalpha.com.ico'); background-size: contain; background-repeat: no-repeat;">
+            </div>
+            <div class="text-overlay">WolframAlpha</div>
+        </li>
+        <li onclick="openProxy('https://www.symbolab.com')">
+            <div class="thumb"
+                style="background-image: url('https://icons.duckduckgo.com/ip3/symbolab.com.ico'); background-size: contain; background-repeat: no-repeat;">
+            </div>
+            <div class="text-overlay">Symbolab</div>
+        </li>
+        <li onclick="openProxy('https://brainly.com')">
+            <div class="thumb"
+                style="background-image: url('https://icons.duckduckgo.com/ip3/brainly.com.ico'); background-size: contain; background-repeat: no-repeat;">
+            </div>
+            <div class="text-overlay">Brainly</div>
+        </li>
+        <li onclick="openProxy('https://chatgpt.com')">
+            <div class="thumb"
+                style="background-image: url('https://icons.duckduckgo.com/ip3/openai.com.ico'); background-size: contain; background-repeat: no-repeat;">
+            </div>
+            <div class="text-overlay">ChatGPT (Web)</div>
+        </li>
+
+        <!-- === SOCIAL === -->
+        <div class="category-header">Social</div>
+
+        <li onclick="openProxy('https://discord.com/app')">
+            <div class="thumb"
+                style="background-image: url('https://icons.duckduckgo.com/ip3/discord.com.ico'); background-size: contain; background-repeat: no-repeat;">
+            </div>
+            <div class="text-overlay">Discord</div>
+        </li>
+        <li onclick="openProxy('https://www.tiktok.com')">
+            <div class="thumb"
+                style="background-image: url('https://icons.duckduckgo.com/ip3/tiktok.com.ico'); background-size: contain; background-repeat: no-repeat;">
+            </div>
+            <div class="text-overlay">TikTok</div>
+        </li>
+        <li onclick="openProxy('https://www.reddit.com')">
+            <div class="thumb"
+                style="background-image: url('https://icons.duckduckgo.com/ip3/reddit.com.ico'); background-size: contain; background-repeat: no-repeat;">
+            </div>
+            <div class="text-overlay">Reddit</div>
+        </li>
+        <li onclick="openProxy('https://www.instagram.com')">
+            <div class="thumb"
+                style="background-image: url('https://icons.duckduckgo.com/ip3/instagram.com.ico'); background-size: contain; background-repeat: no-repeat;">
+            </div>
+            <div class="text-overlay">Instagram</div>
+        </li>
+        <li onclick="openProxy('https://twitter.com')">
+            <div class="thumb"
+                style="background-image: url('https://icons.duckduckgo.com/ip3/twitter.com.ico'); background-size: contain; background-repeat: no-repeat;">
+            </div>
+            <div class="text-overlay">Twitter / X</div>
+        </li>
+
+    </ul>
+    <script>
+        function openProxy(url) {
+            // Encode the URL to hide it from simple filters
+            const encoded = btoa(url);
+            const target = 'active/loader.html?q=' + encoded;
+
+            // Use the settings module to open in an about:blank cloaked window
+            if (window.settings && window.settings.openAboutBlank) {
+                window.settings.openAboutBlank(target);
+            } else {
+                // Fallback if settings didn't load for some reason
+                const win = window.open();
+                win.document.body.style.margin = '0';
+                win.document.body.style.height = '100vh';
+                const iframe = win.document.createElement('iframe');
+                iframe.style.border = 'none';
+                iframe.style.width = '100%';
+                iframe.style.height = '100%';
+                iframe.style.margin = '0';
+                iframe.src = target;
+                win.document.body.appendChild(iframe);
+            }
+        }
+
+        // Search Functionality
+        const searchInput = document.getElementById('app-search');
+        searchInput.addEventListener('input', function () {
+            const filter = this.value.toLowerCase();
+            const items = document.querySelectorAll('#itemList li');
+
+            items.forEach(item => {
+                const text = item.innerText.toLowerCase();
+                if (text.includes(filter)) {
+                    item.style.display = 'flex';
+                } else {
+                    item.style.display = 'none';
+                }
+            });
+
+            // Optional: Hide headers if all their children are hidden
+            document.querySelectorAll('.category-header').forEach(header => {
+                // This is a bit complex to do generic neighbor checking without wrapping, 
+                // so we'll leave headers visible for now or just simple filtering.
+            });
+        });
+    </script>
+
+</body>
+
+</html>

@@ -1,0 +1,953 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="referrer" content="no-referrer">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="css/style.css">
+  <style>
+  </style>
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+  <script src="./js/configstuff.js"></script>
+  <script src="./js/user.js"></script>
+  <script src="./js/uttils.js"></script>
+  <script src="./js/settings-loader.js"></script>
+</head>
+
+<body>
+  <nav>
+    <div id='nav-left'>
+    </div>
+    <div id="nav-right">
+      <button id="grid-toggle" onclick="document.body.classList.toggle('grid-view')">Toggle Grid/List View</button>
+      <img src="images/panic.png" alt="Panic Button" id="panic-button"
+        onclick="window.location.href='https://classroom.google.com'" title="Panic Button - Go to Google">
+      <img src="images/chat.png" alt="Chat" id="chat-button" onclick="window.location.href='./chats.html'"
+        title="Chat with friends like discord!">
+      <h3 style="cursor: pointer;" onclick="window.location.href='https://mhctalkservers.pages.dev/'" title="Chat with friends">Chat</h3>
+      <h3 id="prxy-button" style="cursor: pointer;" onclick="window.location.href='./main.html'"
+        title="Search the web and open sites">Browse</h3>
+      <!--
+      <h3 id="apps-button" style="cursor: pointer;" onclick="window.location.href='./apps.html'" title="Apps & Tools">
+        Apps</h3>
+      -->
+      <h3 id="home-button" style="cursor: pointer;" onclick="window.location.href='./settings.html'" title="Home">
+        Settings</h3>
+      <h3 style="cursor:pointer;" onclick="window.location.href = './about.html'" title="About Me">
+        About Me
+      </h3>
+    </div>
+  </nav>
+  <script src="js/antiblock.js"></script>
+  <script>
+    const admin = new URLSearchParams(window.location.search).get('admin');
+    const accescode = new URLSearchParams(window.location.search).get('free');
+    const navLeft = document.getElementById('nav-left');
+    const navRight = document.getElementById('nav-right');
+    function createNavTitle(text, href) {
+      const h3 = document.createElement('h3');
+      h3.textContent = text;
+      h3.style.cursor = 'pointer';
+      h3.onclick = () => window.location.href = href;
+      return h3;
+    }
+    if (admin === 'True') {
+      // CRITICAL: Verify admin status from database, never trust URL parameter
+      firebase.auth().onAuthStateChanged(async user => {
+        if (!user) return;
+        
+        try {
+          const snap = await window.db.ref(`users/${user.uid}/role`).once("value");
+          const userRole = snap.val();
+          
+          if (userRole === "admin") {
+            // Admin title on left
+            navLeft.appendChild(createNavTitle('Gamer Hubs - Admin', './main.html?admin=True'));
+            const adminTable = createNavTitle('Admin Table', './adtable.html');
+            const adminPanel = createNavTitle('Admin Panel', './admin.html');
+            navRight.appendChild(adminTable);
+            navRight.appendChild(adminPanel);
+            navRight.appendChild(createNavTitle('Leaderboard', './leaderboard.html?admin=True'));
+            document.title = 'Gamer Hubs - Admin';
+            let uids = sessionStorage.getItem('uid');
+            window.trackUser(uids);
+            window.trackUserOnlineStatus(uids);
+            // Initialize admin status
+            if (window.initializeAdminStatus) window.initializeAdminStatus();
+          } else {
+            // Not actually admin - redirect to regular user view
+            window.location.replace('./games.html?admin=False');
+            console.log("Hacker stop doing ts I known its you Krupal");
+          }
+        } catch (err) {
+          console.error("Error verifying admin status:", err);
+          window.location.replace('./games.html?admin=False');
+        }
+      });
+    }
+    else if (accescode === 'True') {
+      navLeft.appendChild(createNavTitle('Gamer HUBS - Free Enabled ', './main.html?free=True'));
+      document.title = 'Gamer Hubs - Free Access';
+      /*navRight.appendChild(createNavTitle('Leaderboard', './leaderboard.html?frees=true'));*/
+      //The fun - Main code
+      sessionStorage.setItem('freeAccess', 'true');
+      sessionStorage.setItem("userroleis", "freeuser");
+    }
+    else {
+      navLeft.appendChild(createNavTitle('Gamer HUBS', './main.html'));
+      /*navRight.appendChild(createNavTitle('Leaderboard', './leaderboard.html?admin=False')); */
+      document.title = 'Studying';
+      let uids = sessionStorage.getItem('uid');
+      console.log(uids);
+      sessionStorage.setItem("userroleis", "user");
+      window.trackUserOnlineStatus(uids);
+      window.trackUser(uids);
+    }
+  </script>
+  <!-- Universal Message Banner -->
+  <div id="universal-banner"
+    style="display: none; background: #f44336; color: #fff; padding: 30px 40px; text-align: center; width: 100%; height: 20vh; border-bottom: 5px solid #d32f2f; box-shadow: 0 6px 20px rgba(0,0,0,0.4); font-size: 24px; font-weight: bold; position: relative; margin-bottom: 20px;">
+    <span id="banner-text"
+      style="display: block; width: 100%; height: 100%; display: flex; align-items: center; justify-content: center;"></span>
+  </div>
+  <div id="search-section">
+    <img src="images/stubott.png" alt="Game Hub Logo" id="search-logo">
+    <div class="search-container">
+      <input type="text" id="game-search" placeholder="Search games...">
+      <select id="category-filter"
+        style="padding: 10px; font-size: 16px; border-radius: 5px; border: none; margin-left: 10px; background-color: black; color: white;">
+        <option value="all">All Categories</option>
+        <option value="hot">Hot</option>
+        <option value="parkour">Parkour</option>
+        <option value="multiplayer">Multiplayer</option>
+        <option value="car">Car</option>
+        <option value="shooting">Shooting</option>
+        <option value="sport">Sport</option>
+        <option value="iq">IQ</option>
+        <option value="retro">Retro</option>
+        <option value="flash">Flash</option>
+        <option value="singleplayer">Singleplayer</option>
+      </select>
+    </div>
+    <div id="online-users" style="font-size: 20px; font-weight: bold; margin: 10px 0; text-align: center;">
+      USERS ONLINE:
+    </div>
+  </div>
+  <ul id="itemList">
+    <li class="hot parkour" id="slope" onclick="window.location.href='game/#slope'">
+      <div class="text-overlay">Slope</div>
+    </li>
+    <li class="hot parkour multiplayer" id="slope-2" onclick="window.location.href='game/#slope-2'">
+      <div class="text-overlay">Slope 2</div>
+    </li>
+    <li class="hot parkour" id="slope-3" onclick="window.location.href='game/#slope-3'">
+      <div class="text-overlay">Slope 3</div>
+    </li>
+    <li class="iq" id="viking-clash" onclick="window.location.href='game/#viking-clash'">
+      <div class="text-overlay">Viking Clash</div>
+    </li>
+    <li class="hot parkour" id="super-mario-64" onclick="window.location.href='game/#super-mario-64'">
+      <div class="text-overlay">Super Mario 64</div>
+    </li>
+    <li class="parkour" id="tomb-of-the-mask" onclick="window.location.href='game/#tomb-of-the-mask'">
+      <div class="text-overlay">Tomb Of the Mask</div>
+    </li>
+    <li class="hot parkour shooting" id="n-gon" onclick="window.location.href = 'game/#n-gon'">
+      <div class="text-overlay">n-gon</div>
+    </li>
+    <li class="hoot parkour shooting" id="timeshooter2" onclick="window.location.href = 'game/#timeshooter2'">
+      <div class="text-overlay">Time Shooter 2</div>
+    </li>
+    <!--
+    -->
+    <li class="parkour" id="level-devil" onclick="window.location.href = 'game/#level-devil'">
+      <div class="text-overlay">level devil</div>
+    </li>
+    <li class="hot multiplayer parkour" id="boxing-random" onclick="window.location.href = 'game/#boxing-random'">
+      <div class="text-overlay">boxing random</div>
+    </li>
+    <li class="hot singleplayer parkour" id="add-game" onclick="window.location.href = 'game/#add-game'">
+      <div class="text-overlay">add-game</div>
+    </li>
+    <li class="hot singleplayer car parkour" id="escaperoadcity" onclick="window.location.href = 'game/#escaperoad'">
+      <div class="text-overlay">Escape Road</div>
+    </li>
+    <li class="hot singleplayer car parkour" id="escaperoadc2" onclick="window.location.href = 'game/#escaperoad2'">
+      <div class="text-overlay">Escape Road 2</div>
+    </li>
+    <li class="hot singleplayer car parkour" id="escaperoadcity2"
+      onclick="window.location.href = 'game/#escaperoadcity2'">
+      <div class="text-overlay">Escape Road City 2</div>
+    </li>
+    <li id="cluster-rush" onclick="window.location.href = 'game/#clusterrush'">
+      <div class="text-overlay">Cluster Rush</div>
+    </li>
+    <li id="rocket-league" onclick="window.location.href = 'game/#rocket-league'">
+      <div class="text-overlay">Rocket League</div>
+    </li>
+    <li id="we-become-what-we-behold" onclick="window.location.href = 'game/#wbwwb'">
+      <div class="text-overlay">We become what we behold</div>
+    </li>
+    <li class="hot parkour shooting" id="ice-dodo" onclick="window.location.href = 'game/#ice-dodo'">
+      <div class="text-overlay">Ice Dodo</div>
+    </li>
+    <li class="car" id="ultimate-car-driving" onclick="window.location.href = 'game/#ultimate-car-driving'">
+      <div class="text-overlay">Ultimate Car Driving Simulator</div>
+    </li>
+    <li class="hot singleplayer parkour" id="hollow-knight" onclick="window.location.href = 'game/#hollow-knight'">
+      <div class="text-overlay">Hollow Knight</div>
+    </li>
+    <li class="car" id="deadly-decent" onclick="window.location.href = 'game/#deadly-decent'">
+      <div class="text-overlay">Deadly Decent</div>
+    </li>
+    <li class="singleplayer" id="stickman-gta-city" onclick="window.location.href = 'game/#stickman-gta-city'">
+      <div class="text-overlay">Stickman GTA City</div>
+    </li>
+    <li class="" id="spacebar-clicker" onclick="window.location.href = 'game/#spacebar-clicker'">
+      <div class="text-overlay">Spacebar Clicker</div>
+    </li>
+    <li class="" id="csgo" onclick="window.location.href = 'game/#csgo'">
+      <div class="text-overlay">Case Clicker 2</div>
+    </li>
+    <li class="shooting" id="armed-forces-io" onclick="window.location.href = 'game/#armed-forces-io'">
+      <div class="text-overlay">Armed Forces.io</div>
+    </li>
+    <li class="shooting" id="war-strike" onclick="window.location.href = 'game/#war-strike'">
+      <div class="text-overlay">War Strike</div>
+    </li>
+    <li class="iq" id="among-us" onclick="window.location.href = 'game/#among-us'">
+      <div class="text-overlay">Among Us</div>
+    </li>
+    <li class="" id="snow-ball-io" onclick="window.location.href = 'game/#snow-ball-io'">
+      <div class="text-overlay">Snow Ball.io</div>
+    </li>
+    <li class="car" id="slow-roads-io" onclick="window.location.href = 'game/#slow-roads-io'">
+      <div class="text-overlay">Slow Roads.io</div>
+    </li>
+    <li class="" id="elastic-man" onclick="window.location.href = 'game/#elastic-man'">
+      <div class="text-overlay">Elastic Man</div>
+    </li>
+    <li class="hot sport multiplayer singleplayer" id="soccer-random"
+      onclick="window.location.href = 'game/#soccer-random'">
+      <div class="text-overlay">soccer random</div>
+    </li>
+    <li class="sport multiplayer" id="football-legends" onclick="window.location.href = 'game/#football-legends'">
+      <div class="text-overlay">Football Legends</div>
+    </li>
+    <li class="hot multiplayer" id="paperio2" onclick="window.location.href = 'game/#paperio2'">
+      <div class="text-overlay">paper io 2</div>
+    </li>
+    <li class="hot sport multiplayer singleplayer" id="basket-random"
+      onclick="window.location.href = 'game/#basket-random'">
+      <div class="text-overlay">basket random</div>
+    </li>
+    <li class="hot sport singleplayer" id="super-liquid-soccer"
+      onclick="window.location.href = 'game/#super-liquid-soccer'">
+      <div class="text-overlay">FIFA 20</div>
+    </li>
+    <li class="hot sport singleplayer" id="superhot" onclick="window.location.href = 'game/#superhot'">
+      <div class="text-overlay">Super Hot</div>
+    </li>
+    <li class="hot car parkour" id="polytrack" onclick="window.location.href='game/#polytrack'">
+      <div class="text-overlay">Polytrack</div>
+    </li>
+    <li class="hot multiplayer shooting" id="kirka-proxy" onclick="window.location.href='game/#kirka-proxy'">
+      <div class="text-overlay">Kirka (Web)</div>
+    </li>
+    <li class="hot multiplayer" id="crazygames-proxy" onclick="window.location.href='game/#crazygames-proxy'">
+      <div class="text-overlay">CrazyGames (Web)</div>
+    </li>
+    <li class="" id="chicken-jockey-clicker" onclick="window.location.href='game/#chicken-jockey-clicker'">
+      <div class="text-overlay">Chicken Jockey Clicker</div>
+    </li>
+    <li class="iq" id="stacktris" onclick="window.location.href='game/#stacktris'">
+      <div class="text-overlay">Stacktris</div>
+    </li>
+    <li class="hot shooting" id="1v1.lol" onclick="window.location.href='game/#1v1.lol'">
+      <div class="text-overlay">1v1.lol</div>
+    </li>
+    <li class="parkour" id="temple-run-2" onclick="window.location.href='game/#temple-run-2'">
+      <div class="text-overlay">Temple Run 2</div>
+    </li>
+    <li class="car" id="draw-the-hill" onclick="window.location.href='game/#draw-the-hill'">
+      <div class="text-overlay">Draw the hill</div>
+    </li>
+    <li class="car" id="eggy-car" onclick="window.location.href='game/#eggy-car'">
+      <div class="text-overlay">Eggy Car</div>
+    </li>
+    <li class="hot parkour" id="adcap" onclick="window.location.href='game/#adcap'">
+      <div class="text-overlay">adcap</div>
+    </li>
+    <li class="hot parkour" id="adofai" onclick="window.location.href='game/#adofai'">
+      <div class="text-overlay">A dance of fire and rain</div>
+    </li>
+    <li class="hot parkour" id="baldi" onclick="window.location.href='game/#baldi'">
+      <div class="text-overlay">baldi</div>
+    </li>
+    <li class="hot parkour" id="bison" onclick="window.location.href='game/#bison'">
+      <div class="text-overlay">bison</div>
+    </li>
+    <li class="hot parkour" id="boxing-physics2" onclick="window.location.href='game/#boxing-physics2'">
+      <div class="text-overlay">boxing-physics2</div>
+    </li>
+    <li class="hot parkour" id="breaklock" onclick="window.location.href='game/#breaklock'">
+      <div class="text-overlay">breaklock</div>
+    </li>
+    <li class="hot parkour" id="burger" onclick="window.location.href='game/#burger'">
+      <div class="text-overlay">burger</div>
+    </li>
+    <li class="hot parkour" id="DogeMiner" onclick="window.location.href='game/#DogeMiner'">
+      <div class="text-overlay">DogeMiner</div>
+    </li>
+    <li class="hot parkour" id="dreader" onclick="window.location.href='game/#dreader'">
+      <div class="text-overlay">dreader</div>
+    </li>
+    <li class="hot parkour" id="flappy" onclick="window.location.href='game/#flappy'">
+      <div class="text-overlay">flappy</div>
+    </li>
+    <li class="hot parkour" id="FNAF" onclick="window.location.href='game/#FNAF'">
+      <div class="text-overlay">FNAF</div>
+    </li>
+    <li class="hot parkour" id="FNAF2" onclick="window.location.href='game/#FNAF2'">
+      <div class="text-overlay">FNAF2</div>
+    </li>
+    <li class="hot parkour" id="FNAF3" onclick="window.location.href='game/#FNAF3'">
+      <div class="text-overlay">FNAF3</div>
+    </li>
+    <li class="hot parkour" id="FNAF4" onclick="window.location.href='game/#FNAF4'">
+      <div class="text-overlay">FNAF4</div>
+    </li>
+    <li class="hot parkour shooting" id="FNAF-UCN" onclick="window.location.href = 'game/#FNAF-UCN'">
+      <div class="text-overlay">FNAF UCN</div>
+    </li>
+    <li class="hot parkour" id="freezeria" onclick="window.location.href='game/#freezeria'">
+      <div class="text-overlay">freezeria</div>
+    </li>
+    <li class="hot parkour" id="friendlyfire" onclick="window.location.href='game/#friendlyfire'">
+      <div class="text-overlay">friendlyfire</div>
+    </li>
+    <li class="hot parkour" id="fruitninja" onclick="window.location.href='game/#fruitninja'">
+      <div class="text-overlay">Fruit Ninja</div>
+    </li>
+    <li class="hot parkour" id="game-inside" onclick="window.location.href='game/#game-inside'">
+      <div class="text-overlay">game-inside</div>
+    </li>
+    <li class="hot parkour" id="jetpackjoyride" onclick="window.location.href='game/#jetpackjoyride'">
+      <div class="text-overlay">jetpackjoyride</div>
+    </li>
+    <li class="hot parkour" id="knifehit" onclick="window.location.href='game/#knifehit'">
+      <div class="text-overlay">knifehit</div>
+    </li>
+    <li class="hot parkour" id="lose95" onclick="window.location.href='game/#lose95'">
+      <div class="text-overlay">lose95</div>
+    </li>
+    <li class="hot parkour" id="retro-bowl" onclick="window.location.href='game/#retro-bowl'">
+      <!-- This exists bro what -->
+      <div class="text-overlay">retro-bowl</div>
+    </li>
+    <li class="hot parkour" id="sansfight" onclick="window.location.href='game/#sansfight'">
+      <div class="text-overlay">sansfight</div>
+    </li>
+    <li class="hot parkour" id="slope" onclick="window.location.href='game/#slope'">
+      <div class="text-overlay">slope</div>
+    </li>
+    <li class="hot parkour" id="snake" onclick="window.location.href='game/#snake'">
+      <div class="text-overlay">snake</div>
+    </li>
+    <li class="hot parkour" id="soccer-random" onclick="window.location.href='game/#soccer-random'">
+      <div class="text-overlay">soccer-random</div>
+    </li>
+    <li class="hot parkour" id="subway" onclick="window.location.href='game/#subway'">
+      <div class="text-overlay">subway</div>
+    </li>
+    <li class="hot parkour" id="superhot" onclick="window.location.href='game/#superhot'">
+      <div class="text-overlay">superhot</div>
+    </li>
+    <li class="hot parkour" id="tacomia" onclick="window.location.href='game/#tacomia'">
+      <div class="text-overlay">tacomia</div>
+    </li>
+    <li class="hot parkour" id="tetris" onclick="window.location.href='game/#tetris'">
+      <div class="text-overlay">tetris</div>
+    </li>
+    <li class="hot parkour" id="tunnelrush" onclick="window.location.href='game/#tunnelrush'">
+      <div class="text-overlay">tunnelrush</div>
+    </li>
+    <li class="hot parkour" id="xx142-b2exe" onclick="window.location.href='game/#xx142-b2exe'">
+      <div class="text-overlay">xx142-b2exe</div>
+    </li>
+    <li class="hot game" id="infiltratingtheairship" onclick="window.location.href = 'game/#infiltratingtheairship'">
+      <div class="text-overlay">Infiltrating the Airship</div>
+    </li>
+    <li class="hot singleplayer fast" id="fridaynightfunkin" onclick="window.location.href = 'game/#fridaynightfunkin'">
+      <div class="text-overlay">Friday Night Funkin</div>
+    </li>
+    <li class="hot" id="run-1" onclick="window.location.href='game/#run-1'">
+      <div class="text-overlay">Run 1</div>
+    </li>
+    <li class="hot" id="run-2" onclick="window.location.href='game/#run-2'">
+      <div class="text-overlay">Run 2</div>
+    </li>
+    <li class="hot" id="run-3" onclick="window.location.href='game/#run-3'">
+      <div class="text-overlay">Run 3</div>
+    </li>
+    <li class="shooting" id="gladihoppers" onclick="window.location.href='game/#gladis'">
+      <div class="text-overlay">Gladihoppers</div>
+    </li>
+    <li class="hot parkour" id="just-fall" onclick="window.location.href='game/#just-fall'">
+      <div class="text-overlay">Just Fall</div>
+    </li>
+    <li class="shooting" id="timeshooter" onclick="window.location.href='game/#time2'">
+      <div class="text-overlay">Timeshooter 2</div>
+    </li>
+    <li class="shooting" id="time-shooter-3" onclick="window.location.href='game/#timeshooter3'">
+      <div class="text-overlay">Timeshooter 3</div>
+    </li>
+    <li class="hot multiplayer" id="yohoho" onclick="window.location.href='game/#yohoho'">
+      <div class="text-overlay">Yohoho</div>
+    </li>
+    <li class="" id="cookie-clicker" onclick="window.location.href='game/#cookieclicker-updated'">
+      <div class="text-overlay">Cookie Clicker (updated)</div>
+    </li>
+    <li class="parkour" id="x-trench-run" onclick="window.location.href='game/#x-trench-run'">
+      <div class="text-overlay">X Trench Run</div>
+    </li>
+    <li class="hot shooting multiplayer" id="topguns.io" onclick="window.location.href='game/#topguns.io'">
+      <div class="text-overlay">TopGuns.io</div>
+    </li>
+    <li class="hot multiplayer sport" id="basketball-legends" onclick="window.location.href='game/#basketball-legends'">
+      <div class="text-overlay">Basketball Legends</div>
+    </li>
+    <li class="hot parkour" id="vex-7" onclick="window.location.href='game/#vex7'">
+      <div class="text-overlay">Vex 7</div>
+    </li>
+    <li class="hot multiplayer singleplayer" id="1.8.8" onclick="window.location.href='game/#1.8.8'">
+      <div class="text-overlay">Eaglercraft 1.8.8</div>
+    </li>
+    <li class="hot cool" id="minesweeper" onclick="window.location.href = 'game/#minesweeper'">
+      <div class="text-overlay">Minesweeper</div>
+    </li>
+    <li class="hot iq" id="block-blast" onclick="window.location.href='game/#block-blast'">
+      <div class="text-overlay">Block Blast</div>
+    </li>
+    <li class="" id="stickman-hook" onclick="window.location.href='game/#stickman-hook'">
+      <div class="text-overlay">Stickman Hook</div>
+    </li>
+    <li class="retro" id="retro-bowl" onclick="window.location.href='game/#retro-bowl'">
+      <div class="text-overlay">Retro Bowl</div>
+    </li>
+    <li class="" id="monkey-mart" onclick="window.location.href='game/#monkey-mart'">
+      <div class="text-overlay">Monkey Mart</div>
+    </li>
+    <li class="hot multiplayer singleplayer" id="1.5.2" onclick="window.location.href='game/#precision-client'">
+      <div class="text-overlay">Eaglercraft with mods (1.5.2)</div>
+    </li>
+    <li class="shooting multiplayer singleplayer" id="getaway-shootout"
+      onclick="window.location.href='game/#getaway-shootout'">
+      <div class="text-overlay">Getaway Shootout</div>
+    </li>
+    <li class="" id="dune" onclick="window.location.href='game/#dune'">
+      <div class="text-overlay">Dune</div>
+    </li>
+    <li class="car" id="drift-boss" onclick="window.location.href='game/#drift-boss'">
+      <div class="text-overlay">Drift Boss</div>
+    </li>
+    <li class="" id="doodle-jump" onclick="window.location.href='game/#doodle-jump'">
+      <div class="text-overlay">Doodle Jump</div>
+    </li>
+    <li class="parkour" id="aquapark.io" onclick="window.location.href='game/#aquapark.io'">
+      <div class="text-overlay">Aquapark.io</div>
+    </li>
+    <li class="hot" id="bitlife" onclick="window.location.href='game/#bit-life'">
+      <div class="text-overlay">Bit Life</div>
+    </li>
+    <li class="hot" id="2048" onclick="window.location.href='game/#2048'">
+      <div class="text-overlay">2048</div>
+    </li>
+    <li class="parkour" id="chrome-dino" onclick="window.location.href='game/#chrome-dino'">
+      <div class="text-overlay">Chrome Dino</div>
+    </li>
+    <li class="car" id="drive-mad" onclick="window.location.href='game/#drive-mad'">
+      <div class="text-overlay">Drive Mad</div>
+    </li>
+    <li class="hot shooting" id="space-invaders" onclick="window.location.href='game/#SPACEINVADERS'">
+      <div class="text-overlay">Space Invaders</div>
+    </li>
+    <li class="parkour" id="only-up" onclick="window.location.href='game/#only-up'">
+      <div class="text-overlay">Only Up</div>
+    </li>
+    <li class="parkour" id="ovo" onclick="window.location.href='game/#ovo/1.4.4'">
+      <div class="text-overlay">OvO</div>
+    </li>
+    <li class="parkour" id="ovo-2" onclick="window.location.href='game/#ovo/2.0.2alpha'">
+      <div class="text-overlay">OvO 2</div>
+    </li>
+    <li class="parkour" id='tunnel-rush' onclick="window.location.href='game/#tunnel-rush'">
+      <div class="text-overlay">Tunnel Rush</div>
+    </li>
+    <li class="sport" id="tiny-fishing" onclick="window.location.href='game/#tiny-fishing'">
+      <div class="text-overlay">Tiny Fishing</div>
+    </li>
+    <li id="mario-game" class="retro" onclick="window.location.href='game/#mario-game'">
+      <div class="text-overlay">Mario Game</div>
+    </li>
+    <li id='doge-miner' onclick="window.location.href='game/#doge-miner'">
+      <div class="text-overlay">Doge Miner</div>
+    </li>
+    <li id='tag' onclick="window.location.href='game/#tag'">
+      <div class="text-overlay">Tag 2, 3, 4 Players</div>
+    </li>
+    <li class="parkour" id='crossy-road' onclick="window.location.href='game/#crossy-road'">
+      <div class="text-overlay">Crossy Road</div>
+    </li>
+    <li class="hot parkour" id='subway-surfers' onclick="window.location.href='game/#subway-surfers'">
+      <div class="text-overlay">Subway Surfers</div>
+    </li>
+    <li class="hot parkour" class="hot" id="snow-rider" onclick="window.location.href='game/#snow-rider'">
+      <div class="text-overlay">Snow Rider 3d</div>
+    </li>
+    <li class="hot" id="gun-spin" onclick="window.location.href='game/#gun-spin'">
+      <div class="text-overlay">Gun Spin</div>
+    </li>
+    <li class="" id="launcha-libre" onclick="window.location.href='game/#launcha-libre'">
+      <div class="text-overlay">Launcha Libre</div>
+    </li>
+    <li class=" flash" id="escape-the-closet" onclick="window.location.href = 'game/#escape-the-closet'">
+      <div class="text-overlay">escape the closet</div>
+    </li>
+    <li class=" flash" id="riddle-transfer" onclick="window.location.href = 'game/#riddle-transfer'">
+      <div class="text-overlay">riddle transfer</div>
+    </li>
+    <li class=" flash" id="escape-the-freezer" onclick="window.location.href = 'game/#escape-the-freezer'">
+      <div class="text-overlay">escape the freezer</div>
+    </li>
+    <li class=" flash" id="rogue-soul-2" onclick="window.location.href = 'game/#rogue-soul-2'">
+      <div class="text-overlay">rogue soul 2</div>
+    </li>
+    <li class=" flash" id="achievement-unlocked-2" onclick="window.location.href = 'game/#achievement-unlocked-2'">
+      <div class="text-overlay">achievement unlocked 2</div>
+    </li>
+    <li class=" flash" id="escape-the-phonebooth" onclick="window.location.href = 'game/#escape-the-phonebooth'">
+      <div class="text-overlay">escape the phonebooth</div>
+    </li>
+    <li class=" flash" id="rogue-soul" onclick="window.location.href = 'game/#rogue-soul'">
+      <div class="text-overlay">rogue soul</div>
+    </li>
+    <li class=" flash" id="achievement-unlocked-3" onclick="window.location.href = 'game/#achievement-unlocked-3'">
+      <div class="text-overlay">achievement unlocked 3</div>
+    </li>
+    <li class=" flash" id="escape-the-shack" onclick="window.location.href = 'game/#escape-the-shack'">
+      <div class="text-overlay">escape the shack</div>
+    </li>
+    <li class=" flash" id="stealing-the-diamond" onclick="window.location.href = 'game/#stealing-the-diamond'">
+      <div class="text-overlay">stealing the diamond</div>
+    </li>
+    <li class=" flash" id="achievement-unlocked" onclick="window.location.href = 'game/#achievement-unlocked'">
+      <div class="text-overlay">achievement unlocked</div>
+    </li>
+    <li class=" flash" id="escaping-the-prison" onclick="window.location.href = 'game/#escaping-the-prison'">
+      <div class="text-overlay">escaping the prison</div>
+    </li>
+    <li class=" flash" id="stick-war" onclick="window.location.href = 'game/#stick-war'">
+      <div class="text-overlay">stick war</div>
+    </li>
+    <li class=" flash" id="age-of-war-hacked" onclick="window.location.href = 'game/#age-of-war-hacked'">
+      <div class="text-overlay">age of war hacked</div>
+    </li>
+    <li class=" flash" id="factory-balls" onclick="window.location.href = 'game/#factory-balls'">
+      <div class="text-overlay">factory balls</div>
+    </li>
+    <li class=" flash" id="submachine-0" onclick="window.location.href = 'game/#submachine-0'">
+      <div class="text-overlay">submachine 0</div>
+    </li>
+    <li class=" flash" id="age-of-war" onclick="window.location.href = 'game/#age-of-war'">
+      <div class="text-overlay">age of war</div>
+    </li>
+    <li class=" flash" id="flash-chess" onclick="window.location.href = 'game/#flash-chess'">
+      <div class="text-overlay">flash chess</div>
+    </li>
+    <li class=" flash" id="bloons-td-1" onclick="window.location.href = 'game/#bloons-td-1'">
+      <div class="text-overlay">bloons td 1</div>
+    </li>
+    <li class="hot" id="deltarune" onclick="window.location.href = 'game/#deltarune'">
+      <div class="text-overlay">Deltarune</div>
+    </li>
+    <li class=" flash" class=" flash" id="submachine-2" onclick="window.location.href = 'game/#submachine-2'">
+      <div class="text-overlay">submachine 2</div>
+    </li>
+    <li class="hot flash" id="bloons-td-2" onclick="window.location.href = 'game/#bloons-td-2'">
+      <div class="text-overlay">bloons td 2</div>
+    </li>
+    <li class=" flash" id="gun-mayhem-2" onclick="window.location.href = 'game/#gun-mayhem-2'">
+      <div class="text-overlay">gun mayhem 2</div>
+    </li>
+    <li class=" flash" id="submachine-3" onclick="window.location.href = 'game/#submachine-3'">
+      <div class="text-overlay">submachine 3</div>
+    </li>
+    <li class=" flash" class="hot" id="bloons-td-3" onclick="window.location.href = 'game/#bloons-td-3'">
+      <div class="text-overlay">bloons td 3</div>
+    </li>
+    <li class=" flash" class="hot" id="gun-mayhem" onclick="window.location.href = 'game/#gun-mayhem'">
+      <div class="text-overlay">gun mayhem</div>
+    </li>
+    <li class=" flash" id="submachine-32-chambers" onclick="window.location.href = 'game/#submachine-32-chambers'">
+      <div class="text-overlay">submachine 32 chambers</div>
+    </li>
+    <li class=" flash" id="bloons-td-4" onclick="window.location.href = 'game/#bloons-td-4'">
+      <div class="text-overlay">bloons td 4</div>
+    </li>
+    <li class=" flash" id="submachine-4" onclick="window.location.href = 'game/#submachine-4'">
+      <div class="text-overlay">submachine 4</div>
+    </li>
+    <li class=" flash" id="bloons" onclick="window.location.href = 'game/#bloons'">
+      <div class="text-overlay">bloons</div>
+    </li>
+    <li class=" flash" id="learn-to-fly-2" onclick="window.location.href = 'game/#learn-to-fly-2'">
+      <div class="text-overlay">learn to fly 2</div>
+    </li>
+    <li class=" flash" id="submachine-5" onclick="window.location.href = 'game/#submachine-5'">
+      <div class="text-overlay">submachine 5</div>
+    </li>
+    <li class=" flash" id="bloxorz" onclick="window.location.href = 'game/#bloxorz'">
+      <div class="text-overlay">bloxorz</div>
+    </li>
+    <li class=" flash" id="learn-to-fly-3" onclick="window.location.href = 'game/#learn-to-fly-3'">
+      <div class="text-overlay">learn to fly 3</div>
+    </li>
+    <li class=" flash" id="submachine-6" onclick="window.location.href = 'game/#submachine-6'">
+      <div class="text-overlay">submachine 6</div>
+    </li>
+    <li class=" flash" id="breaking-the-bank" onclick="window.location.href = 'game/#breaking-the-bank'">
+      <div class="text-overlay">breaking the bank</div>
+    </li>
+    <li class="hot flash" id="learn-to-fly-idle" onclick="window.location.href = 'game/#learn-to-fly-idle'">
+      <div class="text-overlay">learn to fly idle</div>
+    </li>
+    <li class=" flash" id="submachine-7" onclick="window.location.href = 'game/#submachine-7'">
+      <div class="text-overlay">submachine 7</div>
+    </li>
+    <li class=" flash" id="cat-ninja" onclick="window.location.href = 'game/#cat-ninja'">
+      <div class="text-overlay">cat ninja</div>
+    </li>
+    <li class=" flash" id="learn-to-fly" onclick="window.location.href = 'game/#learn-to-fly'">
+      <div class="text-overlay">learn to fly</div>
+    </li>
+    <li class=" flash" id="submachine-8" onclick="window.location.href = 'game/#submachine-8'">
+      <div class="text-overlay">submachine 8</div>
+    </li>
+    <li class=" flash" id="creative-kill-chamber" onclick="window.location.href = 'game/#creative-kill-chamber'">
+      <div class="text-overlay">creative kill chamber</div>
+    </li>
+    <li class=" flash" class="hot" id="papas-freezeria" onclick="window.location.href = 'game/#papas-freezeria'">
+      <div class="text-overlay">papas freezeria</div>
+    </li>
+    <li class=" flash" id="submachine-9" onclick="window.location.href = 'game/#submachine-9'">
+      <div class="text-overlay">submachine 9</div>
+    </li>
+    <li class="hot flash" id="curveball" onclick="window.location.href = 'game/#curveball'">
+      <div class="text-overlay">curveball</div>
+    </li>
+    <li class="hot flash" id="papas-pizzaria" onclick="window.location.href = 'game/#papas-pizzaria'">
+      <div class="text-overlay">papas pizzaria</div>
+    </li>
+    <li class=" flash" id="submachine-flf" onclick="window.location.href = 'game/#submachine-flf'">
+      <div class="text-overlay">submachine flf</div>
+    </li>
+    <li class=" flash" id="raft-wars-2" onclick="window.location.href = 'game/#raft-wars-2'">
+      <div class="text-overlay">raft wars 2</div>
+    </li>
+    <li class=" flash" id="submachine" onclick="window.location.href = 'game/#submachine'">
+      <div class="text-overlay">submachine</div>
+    </li>
+    <li class=" flash" id="raft-wars" onclick="window.location.href = 'game/#raft-wars'">
+      <div class="text-overlay">raft wars</div>
+    </li>
+    <li class=" flash" id="sugar-sugar" onclick="window.location.href = 'game/#sugar-sugar'">
+      <div class="text-overlay">sugar sugar</div>
+    </li>
+    <li class=" flash" id="riddle-school-2" onclick="window.location.href = 'game/#riddle-school-2'">
+      <div class="text-overlay">riddle school 2</div>
+    </li>
+    <li class=" flash" id="the-impossible-quiz" onclick="window.location.href = 'game/#the-impossible-quiz'">
+      <div class="text-overlay">the impossible quiz</div>
+    </li>
+    <li class=" flash" id="duck-life-2" onclick="window.location.href = 'game/#duck-life-2'">
+      <div class="text-overlay">duck life 2</div>
+    </li>
+    <li class=" flash" id="riddle-school-3" onclick="window.location.href = 'game/#riddle-school-3'">
+      <div class="text-overlay">riddle school 3</div>
+    </li>
+    <li class=" flash" id="this-is-the-only-level-2" onclick="window.location.href = 'game/#this-is-the-only-level-2'">
+      <div class="text-overlay">this is the only level 2</div>
+    </li>
+    <li class=" flash" id="duck-life-3" onclick="window.location.href = 'game/#duck-life-3'">
+      <div class="text-overlay">duck life 3</div>
+    </li>
+    <li class=" flash" id="riddle-school-4" onclick="window.location.href = 'game/#riddle-school-4'">
+      <div class="text-overlay">riddle school 4</div>
+    </li>
+    <li class="hot flash" id="this-is-the-only-level" onclick="window.location.href = 'game/#this-is-the-only-level'">
+      <div class="text-overlay">this is the only level</div>
+    </li>
+    <li class=" flash" id="duck-life" onclick="window.location.href = 'game/#duck-life'">
+      <div class="text-overlay">duck life</div>
+    </li>
+    <li class=" flash" id="riddle-school-5" onclick="window.location.href = 'game/#riddle-school-5'">
+      <div class="text-overlay">riddle school 5</div>
+    </li>
+    <li class=" flash" id="ultimate-chess" onclick="window.location.href = 'game/#ultimate-chess'">
+      <div class="text-overlay">ultimate chess</div>
+    </li>
+    <li class=" flash" id="escape-the-bathroom" onclick="window.location.href = 'game/#escape-the-bathroom'">
+      <div class="text-overlay">escape the bathroom</div>
+    </li>
+    <li class=" flash" id="riddle-school" onclick="window.location.href = 'game/#riddle-school'">
+      <div class="text-overlay">riddle school</div>
+    </li>
+    <li class=" flash" id="escape-the-car" onclick="window.location.href = 'game/#escape-the-car'">
+      <div class="text-overlay">escape the car</div>
+    </li>
+  </ul>
+  <script>
+    window.getPeopleCount = function () {
+      return db.ref("users").orderByChild("online").equalTo(true).once("value")
+        .then(snap => snap.numChildren());
+    };
+    async function updateOnlineUsers() {
+      const onlineEl = document.getElementById("online-users");
+      if (!onlineEl) return;
+      try {
+        const count = await window.getPeopleCount();
+        onlineEl.textContent = `USERS ONLINE: ${count}`;
+      } catch (err) {
+        console.error("Failed to get online users:", err);
+        onlineEl.textContent = `USERS ONLINE: ?`;
+      }
+    }
+    document.addEventListener("DOMContentLoaded", updateOnlineUsers);
+    setInterval(updateOnlineUsers, 10000);
+  </script>
+  <script>
+    // Universal Message Banner
+    document.addEventListener('DOMContentLoaded', () => {
+      const banner = document.getElementById('universal-banner');
+      const bannerText = document.getElementById('banner-text');
+      if (!banner || !bannerText) {
+        console.error('Banner elements not found');
+        return;
+      }
+      console.log('Banner elements found, initializing...');
+      if (!window.db) {
+        console.error('Firebase db not available!');
+        bannerText.textContent = 'Firebase not initialized';
+        banner.style.display = 'block';
+        return;
+      }
+      let lastMessageSeen = localStorage.getItem('LastbannerShown');
+      window.db.ref('info/message').on('value', (snapshot) => {
+        const currentMessage = snapshot.val();
+        if (currentMessage && currentMessage !== lastMessageSeen) {
+          bannerText.textContent = currentMessage;
+          banner.style.display = 'block';
+          localStorage.setItem('LastbannerShown', currentMessage);
+          lastMessageSeen = currentMessage;
+          setTimeout(() => {
+            banner.style.display = 'none';
+          }, 30000);
+        } else {
+          banner.style.display = 'none';
+        }
+      }, (error) => {
+        console.error('Firebase error:', error);
+        bannerText.textContent = 'Firebase Error: ' + error.message;
+        banner.style.display = 'block';
+      });
+    });
+  </script>
+  <script type="text/javascript">
+    atOptions = {
+      'key': '653a14f22744584ca5c2b6367dbe7288',
+      'format': 'iframe',
+      'height': 50,
+      'width': 320,
+      'params': {}
+    };
+    // Use images from ./images/games; remove list items without matching images.
+    const itemList = document.getElementById('itemList');
+    const gridToggle = document.getElementById('grid-toggle');
+    function humanize(id) {
+      if (!id) return 'Game';
+      return id.replace(/[-_.]/g, ' ').replace(/\b\w/g, c => c.toUpperCase())
+    }
+    // Try common extensions for each game id and keep the first that loads.
+    function findExistingImage(id, exts = ['png', 'jpg', 'jpeg', 'webp']) {
+      return new Promise(resolve => {
+        let i = 0;
+        const tried = [];
+        function tryNext() {
+          if (i >= exts.length) {
+            console.warn(`No image found for "${id}". Tried:`, tried);
+            resolve('images/chwww.jpeg'); // fallback image
+            return;
+          }
+          const src = `images/games/${id}.${exts[i]}`;
+          tried.push(src);
+          const img = new Image();
+          img.onload = () => resolve(src);
+          img.onerror = () => { i++; tryNext(); };
+          img.src = src;
+        }
+        tryNext();
+      });
+    }
+    async function initGameList() {
+      const items = Array.from(itemList.querySelectorAll('li'));
+      for (const li of items) {
+        const id = li.id;
+        // Extract URL from onclick attribute
+        const onclickAttr = li.getAttribute('onclick');
+        let gameUrl = `game/#${encodeURIComponent(id)}`; // default fallback
+        if (onclickAttr) {
+          // Attempt to extract content inside single or double quotes after href= or location=
+          // Matches basic patterns like window.location.href='...' or just '...'
+          const match = onclickAttr.match(/['"]([^'"]+)['"]/);
+          if (match && match[1]) {
+            gameUrl = match[1];
+          }
+        }
+        // Find an image based on the ID only
+        const src = await findExistingImage(id);
+        li.innerHTML = '';
+        // Remove original onclick to prevent double firing and rely on our new listener
+        li.removeAttribute('onclick');
+        const thumb = document.createElement('div');
+        thumb.className = 'thumb';
+        thumb.style.backgroundImage = `url('${src}')`;
+        const caption = document.createElement('div');
+        caption.className = 'caption';
+        caption.textContent = humanize(id);
+        const controls = document.createElement('div');
+        controls.className = 'controls';
+        const openBtn = document.createElement('button');
+        openBtn.className = 'openBtn';
+        openBtn.textContent = 'Open';
+        openBtn.addEventListener('click', e => {
+          e.stopPropagation();
+          window.open(gameUrl, '_blank');
+        });
+        controls.appendChild(openBtn);
+        li.appendChild(thumb);
+        li.appendChild(caption);
+        li.appendChild(controls);
+        li.addEventListener('click', () => {
+          window.location.href = gameUrl;
+        });
+      }
+      // Restore grid/list view
+      const savedView = localStorage.getItem('gameHubView');
+      if (savedView === 'grid') itemList.classList.add('grid-view');
+    }
+    // Restore grid/list view from localStorage
+    const savedView = localStorage.getItem('toggleGoForMath');
+    if (savedView === 'Grid View') {
+      itemList.classList.add('grid-view');
+      if (gridToggle) gridToggle.textContent = 'List View';
+    } else {
+      itemList.classList.remove('grid-view');
+      if (gridToggle) gridToggle.textContent = 'Grid View';
+    }
+    if (gridToggle) {
+      gridToggle.addEventListener('click', function () {
+        itemList.classList.toggle('grid-view');
+        const isGrid = itemList.classList.contains('grid-view');
+        gridToggle.textContent = isGrid ? 'List View' : 'Grid View';
+        localStorage.setItem('toggleGoForMath', isGrid ? 'Grid View' : 'List View');
+      });
+    }
+    // Initialize on DOM ready
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', initGameList);
+    } else {
+      initGameList();
+    }
+    // Responsive grid: compute how many items fit per row from container width
+    (function () {
+      const MIN_ITEM_PX = 160; // must match CSS min width used in grid
+      let resizeTimer = null;
+      function updateGridColumns() {
+        const list = document.getElementById('itemList');
+        if (!list) return;
+        const width = list.clientWidth || document.documentElement.clientWidth;
+        const cols = Math.max(1, Math.floor(width / MIN_ITEM_PX));
+        list.style.gridTemplateColumns = `repeat(${cols}, minmax(${MIN_ITEM_PX}px, 1fr))`;
+      }
+      // debounce resize updates
+      window.addEventListener('resize', () => {
+        clearTimeout(resizeTimer);
+        resizeTimer = setTimeout(updateGridColumns, 120);
+      });
+      // run on initial load and after DOM changes
+      document.addEventListener('DOMContentLoaded', () => { updateGridColumns(); });
+      // also call periodically after init to account for images/async layout
+      setTimeout(updateGridColumns, 200);
+    })();
+    // Search and Filter functionality
+    const gameSearch = document.getElementById('game-search');
+    const categoryFilter = document.getElementById('category-filter');
+    function filterGames() {
+      const searchTerm = gameSearch.value.toLowerCase();
+      const selectedCategory = categoryFilter.value.toLowerCase();
+      const gameItems = document.querySelectorAll('#itemList li');
+      gameItems.forEach(item => {
+        const gameName = item.getAttribute('id').toLowerCase();
+        const caption = item.querySelector('.caption');
+        const captionText = caption ? caption.textContent.toLowerCase() : '';
+        const itemClasses = Array.from(item.classList).map(c => c.toLowerCase());
+        // Check text match
+        const matchesText = gameName.includes(searchTerm) || captionText.includes(searchTerm);
+        // Check category match
+        let matchesCategory = true;
+        if (selectedCategory !== 'all') {
+          matchesCategory = itemClasses.includes(selectedCategory);
+        }
+        if (matchesText && matchesCategory) {
+          item.style.display = '';
+        } else {
+          item.style.display = 'none';
+        }
+      });
+    }
+    gameSearch.addEventListener('input', filterGames);
+    categoryFilter.addEventListener('change', filterGames);
+  </script>
+  <script>
+    window.openProxyFromGames = function (injectUrl) {
+      const returnTo = `${window.location.pathname}${window.location.search}${window.location.hash}`;
+      const params = new URLSearchParams();
+      params.set('returnTo', returnTo);
+      if (injectUrl) {
+        params.set('q', injectUrl);
+      }
+      window.location.href = `/a?${params.toString()}`;
+    };
+
+    sessionStorage.setItem(
+      'activeReturnUrl',
+      `${window.location.pathname}${window.location.search}${window.location.hash}`
+    );
+
+    // Track user if pathname is /games.html, ignoring query parameters
+    if (window.location.pathname === '/games.html') {
+      const uid = localStorage.getItem('uid');
+      if (uid) {
+        trackUser(uid);
+        trackUserOnlineStatus(uid);
+      }
+    }
+  </script>
+</body>
+
+
+</html>

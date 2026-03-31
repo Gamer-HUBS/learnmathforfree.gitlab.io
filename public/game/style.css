@@ -1,0 +1,66 @@
+:root{
+  --bg:#0b0b0d;
+  --panel:#0f1720;
+  --accent:#1fb6ff;
+  --muted:#9aa4ad;
+}
+*{box-sizing:border-box}
+html,body{height:100%;}
+body{
+  margin:0;
+  background:linear-gradient(180deg,var(--bg),#071018);
+  color:#e6eef6;
+  font-family: 'Segoe UI', Roboto, Arial, sans-serif;
+  -webkit-font-smoothing:antialiased;
+  -moz-osx-font-smoothing:grayscale;
+}
+.player-shell{
+  display:flex;
+  flex-direction:column;
+  height:100vh;
+}
+.player-topbar{
+  display:flex;
+  align-items:center;
+  gap:12px;
+  padding:10px 14px;
+  background:linear-gradient(90deg, rgba(255,255,255,0.02), rgba(0,0,0,0.08));
+  border-bottom:1px solid rgba(255,255,255,0.03);
+}
+.brand{font-weight:700; font-size:16px; color:var(--accent)}
+.title{flex:1; font-size:15px; color:#dcecff}
+.controls{display:flex;gap:8px}
+.btn{
+  background:transparent;
+  border:1px solid rgba(255,255,255,0.06);
+  color:var(--muted);
+  padding:6px 10px;
+  border-radius:6px;
+  cursor:pointer;
+  display:inline-flex;
+  align-items:center;
+  gap:8px;
+}
+.btn:hover{color:#fff;border-color:rgba(255,255,255,0.15)}
+.btn img{width:18px;height:18px;display:block}
+.player-area{flex:1; position:relative; display:block; overflow:hidden;}
+#player{width:100%;height:100%;background:#000;display:flex;align-items:center;justify-content:center}
+#player iframe{width:100%;height:100%;border:0;background:#000}
+.loading{
+  position:absolute;left:16px;bottom:16px;background:rgba(0,0,0,0.5);padding:8px 10px;border-radius:8px;color:var(--muted);font-size:13px;border:1px solid rgba(255,255,255,0.03)
+}
+/* Immersive mode: hide chrome and let the game fill the viewport */
+.player-shell.immersive .player-topbar{display:none}
+.player-shell.immersive .player-area{
+  position:fixed;
+  top:0;left:0;right:0;bottom:0;
+  width:100vw;height:100vh;
+  z-index:9999;
+}
+.player-shell.immersive #player{width:100%;height:100%;display:block}
+.player-shell.immersive #player iframe{width:100%;height:100%;border:0}
+/* small screens */
+@media (max-width:640px){
+  .title{font-size:13px}
+  .btn{padding:6px}
+}

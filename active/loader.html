@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Loading...</title>
+  <style>
+    body {
+      margin: 0;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: #020617;
+      color: #e2e8f0;
+      font: 16px/1.4 system-ui, sans-serif;
+    }
+    #status { opacity: 0.85; }
+  </style>
+</head>
+<body>
+  <div id="status">Loading...</div>
+  <script>
+(async function loadScramjetAndProxy() {
+  const scripts = [
+    "/scramjet/scramjet.codecs.js",
+    "/scramjet/scramjet.config.js",
+    "/scramjet/scramjet.bundle.js",
+    "/vendor/bare-mux-v1/bare.js",
+    "/vendor/epoxy/index.js"
+  ];
+
+  for (const url of scripts) {
+    console.log("Fetching", url);
+    const res = await fetch(url);
+    if (!res.ok) throw new Error(`Failed to fetch ${url}: ${res.status}`);
+    const code = await res.text();
+    (0, eval)(code); // global eval
+    console.log("Loaded", url, code.length, "bytes");
+  }
+
+  const waitForGlobals = (timeout = 15000) =>
+    new Promise((resolve, reject) => {
+      const start = Date.now();
+      const interval = setInterval(() => {
+        const bareMux = globalThis.BareMux;
+        const epoxyTransport = globalThis.EpoxyTransport?.default;
+        const ready = bareMux?.SetTransport && epoxyTransport;
+
+        if (ready) {
+          clearInterval(interval);
+          resolve({ bareMux, epoxyTransport });
+        }
+
+        if (Date.now() - start > timeout) {
+          clearInterval(interval);
+          reject(
+            new Error(
+              `Timed out waiting for globals. BareMux=${!!bareMux} Epoxy=${!!epoxyTransport}`
+            )
+          );
+        }
+      }, 100); // poll every 100ms
+    });
+
+  //try {
+    //console.log("Waiting for globals...");
+    //const globals = await waitForGlobals();
+    //console.log("Globals ready:", globals);
+  //} catch (err) {
+    //console.error("Failed waiting for globals:", err);
+    //return;
+  //}
+
+  // Import proxy only after globals exist
+  const { ensureProxyReady } = await import("/active/scripts/prxy.mjs");
+  await ensureProxyReady();
+
+  console.log("Scramjet + proxy initialized successfully.");
+})();
+</script>
+</body>
+</html>

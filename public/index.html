@@ -1,0 +1,379 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Math Learning Hub</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        /* --- STYLES FOR A CLEANER, MODERN UI --- */
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            background: linear-gradient(to bottom right, #f7f7f7, #e0e6f0);
+            color: #333;
+        }
+
+        .no-cursor-pointer {
+            cursor: default;
+        }
+
+        header {
+            background: #3b82f6;
+            color: white;
+            padding: 20px;
+            text-align: center;
+            font-size: 36px;
+            font-weight: 700;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.15);
+        }
+
+        #secretButton {
+            position: fixed;
+            bottom: 15px;
+            right: 15px;
+            width: 40px;
+            height: 40px;
+            background: transparent;
+            cursor: pointer;
+            z-index: 9990;
+            border-radius: 50%;
+        }
+
+        #secretIframe {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            border: none;
+            z-index: 9999;
+            background: white;
+        }
+
+        .container {
+            padding: 25px;
+            max-width: 950px;
+            margin: auto;
+        }
+
+        #searchBox {
+            width: 100%;
+            padding: 14px;
+            font-size: 18px;
+            margin-bottom: 25px;
+            border: 1px solid #cceeff;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+            transition: box-shadow 0.3s;
+        }
+
+        #searchBox:focus {
+            outline: none;
+            border-color: #3b82f6;
+            box-shadow: 0 0 10px rgba(59, 130, 246, 0.4);
+        }
+
+        .topic-btn {
+            width: 100%;
+            padding: 16px;
+            font-size: 18px;
+            margin: 8px 0;
+            background: white;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            text-align: left;
+            transition: 0.3s ease;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.08);
+        }
+
+        .topic-btn:hover {
+            background: #dbeafe;
+            box-shadow: 0 4px 8px rgba(59, 130, 246, 0.2);
+            transform: translateY(-1px);
+        }
+
+        .info-box {
+            display: none;
+            padding: 20px;
+            background: white;
+            margin-top: 10px;
+            border-radius: 10px;
+            border-left: 5px solid #3b82f6;
+            line-height: 1.6;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.08);
+        }
+
+        #gameArea {
+            display: none;
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            border: 1px solid #ccc;
+            margin-top: 20px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        #gameArea h3 {
+            color: #3b82f6;
+            margin-top: 0;
+        }
+
+        #gameArea button {
+            padding: 10px 15px;
+            background: #3b82f6;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        #gameArea button:hover {
+            background: #2563eb;
+        }
+
+        #answer {
+            padding: 8px;
+            border-radius: 6px;
+            border: 1px solid #ccc;
+            margin-right: 10px;
+        }
+    </style>
+</head>
+
+<body>
+
+    <header>Math Learning Hub</header>
+
+    <div id="secretButton" onclick="openSecret()" class="no-cursor-pointer"></div>
+    <div id="thestuff"></div>
+
+    <div class="container">
+        <input id="searchBox" onkeyup="searchTopics()" placeholder="Search math topics...">
+        <div id="topics"></div>
+
+        <div id="gameArea">
+            <h3>Multiplication Practice</h3>
+            <p id="problem">Loading...</p>
+            <input id="answer" type="number" placeholder="Your answer">
+            <button onclick="checkAnswer()">Submit</button>
+            <p id="result"></p>
+        </div>
+    </div>
+
+
+    <!-- Firebase -->
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+
+    <script src="js/configstuff.js"></script>
+    <script src="js/uttils.js"></script>
+    <script src="js/settings-loader.js"></script>
+
+
+
+    <script>
+
+
+        /* ========= CLEAN NAVIGATION ========= */
+        function launchIframe(src) {
+            console.log("[launchIframe] Directly navigating to:", src);
+            window.open(src, "_blank");
+        }
+        let isLoggingIn = false;
+
+        // Helper: get cookie
+        function getCookie(name) {
+            console.log("[getCookie] Looking for cookie:", name);
+            const nameEQ = name + "=";
+            const ca = document.cookie.split(';');
+            for (let i = 0; i < ca.length; i++) {
+                let c = ca[i].trim();
+                if (c.indexOf(nameEQ) === 0) {
+                    console.log("[getCookie] Found cookie:", name, "=", c.substring(nameEQ.length));
+                    return c.substring(nameEQ.length);
+                }
+            }
+            console.log("[getCookie] Cookie not found:", name);
+            return null;
+        }
+
+        async function openSecret() {
+            console.log("[openSecret] Called.");
+            if (window.isLoggingIn) return;
+            window.isLoggingIn = true;
+
+            try {
+                const codeCookie = getCookie("Code");
+                const codeFree = getCookie("Codefree");
+
+                console.log("[openSecret] codeCookie:", codeCookie, "codeFree:", codeFree);
+
+                if (!codeCookie && !codeFree) {
+                    // Navigate directly instead of framing
+                    window.location.href = "./theactualindex.html";
+                    return;
+                }
+
+                if (codeFree) {
+                    launchIframe("./main.html?free=True");
+                    return;
+                }
+
+                let user = firebase.auth().currentUser;
+                let role = null;
+
+                if (!user) {
+                    role = await googleLogin();
+                    if (!role) return;
+                    user = firebase.auth().currentUser;
+                }
+
+                const snap = await db.ref(`users/${user.uid}`).get();
+                if (!snap.exists()) return console.warn("User data missing");
+                const data = snap.val();
+                if (!role) role = data.role;
+                if (role === "blocked") {
+                    alert("You were blocked by an Admin!");
+                    window.location.href = "https://google.com";
+                }
+                else {
+                    const src = role === "admin" ? "./main.html?admin=True" : "./main.html?admin=False";
+                    launchIframe(src);
+                }
+
+            } catch (err) {
+                console.error("[openSecret] Error:", err);
+                alert("Something went wrong!");
+            } finally {
+                window.isLoggingIn = false;
+                console.log("[openSecret] Finished login flow.");
+            }
+        }
+        window.openSecret = openSecret;
+    </script>
+    <!-- AntiBlock -->
+    <script>
+        const topics = {
+            "Addition": "The process of combining two or more numbers to find their total sum.",
+            "Subtraction": "The process of taking one number away from another to find the difference.",
+            "Multiplication": "A shortcut for repeated addition; finding the product of two or more numbers.",
+            "Division": "The process of splitting a number into equal parts or groups.",
+            "Fractions": "Numbers representing a part of a whole, written as a numerator over a denominator.",
+            "Decimals": "Numbers that include a whole part and a fractional part separated by a decimal point.",
+            "Percentages": "A ratio expressed as a fraction of 100.",
+            "Place Value": "The value of a digit based on its position in a number.",
+            "Rounding": "Approximating a number to a chosen place value.",
+            "Order of Operations": "Rules (PEMDAS/BODMAS) that determine calculation order.",
+            "Integers": "Positive whole numbers, negative whole numbers, and zero.",
+            "Prime Numbers": "Numbers greater than 1 with exactly two factors.",
+            "Factors": "Numbers that multiply to produce another number.",
+            "Multiples": "Results of multiplying a number by an integer.",
+            "Exponents": "How many times a base is multiplied by itself.",
+            "Square Roots": `A number that, when multiplied by itself,
+    gives the original number.`,
+            "Equations": `A statement showing two expressions are equal.`,
+            "Inequalities": `A comparison using symbols like <, >, ≤, ≥.`,
+            "Functions": `A rule where each input has exactly one output.`,
+            "Graphing": "Visual representation of mathematical relationships.",
+            "Slope": "Steepness of a line (rise over run).",
+            "Angles": "The space formed by two rays from a common point.",
+            "Area": "The amount of space inside a shape.",
+            "Perimeter": "The distance around a shape.",
+            "Volume": "The space occupied by a 3D object.",
+            "Probability": "Likelihood of an event occurring.",
+            "Statistics": "Collecting and analyzing data.",
+            "Ratios": "Comparison of two quantities.",
+            "Proportions": "Two ratios that are equal.",
+            "Linear Equations": "Equations whose graph is a straight line.",
+            "Quadratics": "Second-degree polynomial equations.",
+            "Polynomials": "Expressions with variables and exponents.",
+            "Trigonometry": "Relationships between angles and sides of triangles.",
+            "Pythagorean Theorem": "a² + b² = c² for right triangles.",
+            "Absolute Value": "Distance from zero on a number line.",
+            "Logarithms": "Inverse of exponentiation.",
+            "Limits": "Value a function approaches.",
+            "Derivatives": "Rate of change of a function.",
+            "Integrals": "Area under a curve.",
+            "Vectors": "Quantities with magnitude and direction.",
+            "Matrices": "Rectangular arrays of numbers.",
+            "Set Theory": "Study of collections of objects.",
+            "Transformations": "Moves or changes shapes (slide, flip, rotate)."
+        };
+
+        // ===== GENERATE TOPICS & INIT =====
+        function initializeTopics() {
+            const container = document.getElementById("topics");
+            let idx = 0;
+            for (let topic in topics) {
+                const infoId = "info" + idx++;
+                const btn = document.createElement("button");
+                btn.className = "topic-btn";
+                btn.textContent = topic;
+                btn.addEventListener("click", () => toggleInfo(infoId));
+                container.appendChild(btn);
+
+                const box = document.createElement("div");
+                box.className = "info-box";
+                box.id = infoId;
+                box.innerHTML = `<p>${topics[topic]}</p>`;
+                if (topic === "Multiplication") {
+                    const gameBtn = document.createElement("button");
+                    gameBtn.textContent = "Start Multiplication Practice";
+                    gameBtn.style.marginTop = "10px";
+                    gameBtn.addEventListener("click", startGame);
+                    box.appendChild(gameBtn);
+                }
+                container.appendChild(box);
+            }
+        }
+        // Call the function to load the topics when the script runs
+        initializeTopics();
+
+        // ===== TOGGLE INFO =====
+        function toggleInfo(id) {
+            const box = document.getElementById(id);
+            box.style.display = (box.style.display === "block") ? "none" : "block";
+        }
+
+        // ===== SEARCH =====
+        function searchTopics() {
+            const input = document.getElementById("searchBox").value.toLowerCase();
+            Array.from(document.getElementsByClassName("topic-btn"))
+                .forEach(btn => btn.style.display = btn.textContent.toLowerCase().includes(input) ? "block" : "none");
+        }
+
+        // ===== MULTIPLICATION GAME =====
+        let currentA, currentB;
+        function startGame() { document.getElementById("gameArea").style.display = "block"; newProblem(); }
+        function newProblem() {
+            currentA = Math.floor(Math.random() * 12) + 1; currentB = Math.floor(Math.random() * 12) + 1;
+            document.getElementById("problem").innerText = `${currentA} × ${currentB} = ?`;
+        }
+        function checkAnswer() {
+            const ans = Number(document.getElementById("answer").value);
+            const result = document.getElementById("result");
+            if (ans === currentA * currentB) { result.innerText = "Correct!"; result.style.color = "green"; }
+            else {
+                result.innerText = `Wrong. The correct answer was ${currentA * currentB}. Try again!`;
+                result.style.color = "red";
+            }
+            document.getElementById("answer").value = "";
+            setTimeout(newProblem, 1500);
+        }
+    </script>
+
+    <footer style="text-align:center; padding:20px; font-size:16px; color:#555;">
+        Credit To <a href="https://mathactivities.github.io" target="_blank">mathactivities.github.io</a> for help
+        on the site and coding
+    </footer>
+
+    <iframe id="secretIframe" allowfullscreen></iframe>
+
+</body>
+
+</html>

@@ -1,0 +1,22 @@
+{
+  "name": "learnmathforfree-server",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Node.js server wrapper for the Learn Math For Free site",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node --watch server.js"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "dependencies": {
+    "@mercuryworkshop/epoxy-transport": "^3.0.1",
+    "@mercuryworkshop/scramjet": "^1.0.2",
+    "@mercuryworkshop/wisp-js": "^0.4.1",
+    "@tomphttp/bare-server-node": "^2.0.6",
+    "bare-mux-v1": "npm:@mercuryworkshop/bare-mux@^1.1.4",
+    "express": "^4.21.2"
+  }
+}

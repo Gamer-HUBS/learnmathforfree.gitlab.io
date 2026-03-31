@@ -1,0 +1,337 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin Panel - Learn Math For free</title>
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: system-ui, sans-serif;
+      background: #0e1117;
+      color: #e6edf3;
+      padding-top: 70px;
+    }
+
+    nav {
+      background: #161b22;
+      padding: 10px 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      z-index: 100;
+      border-bottom: 1px solid #30363d;
+    }
+
+    nav h3 {
+      cursor: pointer;
+      font-size: 1.5em;
+      color: #fff;
+    }
+
+    nav img {
+      height: 32px;
+      cursor: pointer;
+      margin-left: 12px;
+    }
+
+    #adminApp {
+      width: 100%;
+      margin: 20px 0;
+      background: #161b22;
+      padding: 20px 25px;
+      border-radius: 0;
+      box-shadow: 0 15px 40px #0008;
+    }
+
+    h1 {
+      text-align: center;
+      margin-bottom: 30px;
+      color: #c9d1d9;
+    }
+
+    .message-section {
+      background: #1f262e;
+      padding: 20px;
+      border-radius: 8px;
+      border: 1px solid #30363d;
+      margin-bottom: 20px;
+    }
+
+    .message-section h2 {
+      color: #c9d1d9;
+      margin-bottom: 15px;
+      font-size: 1.2em;
+    }
+
+    textarea {
+      width: 100%;
+      padding: 12px;
+      border-radius: 6px;
+      border: 1px solid #30363d;
+      background: #0e1117;
+      color: #e6edf3;
+      font-size: 14px;
+      resize: vertical;
+      min-height: 100px;
+      font-family: inherit;
+    }
+
+    textarea:focus {
+      outline: none;
+      border-color: #58a6ff;
+    }
+
+    .button-group {
+      margin-top: 15px;
+      display: flex;
+      gap: 10px;
+    }
+
+    button {
+      border: none;
+      border-radius: 6px;
+      padding: 10px 16px;
+      cursor: pointer;
+      font-weight: bold;
+      font-size: 14px;
+      transition: 0.2s;
+    }
+
+    button.primary {
+      background: #238636;
+      color: white;
+    }
+
+    button.primary:hover {
+      background: #2ea043;
+    }
+
+    button.danger {
+      background: #da3633;
+      color: white;
+    }
+
+    button.danger:hover {
+      background: #ff4c42;
+    }
+
+    #status {
+      margin-top: 15px;
+      padding: 10px;
+      border-radius: 6px;
+      text-align: center;
+      font-weight: bold;
+    }
+
+    .success {
+      background: #238636;
+      color: white;
+    }
+
+    .error {
+      background: #da3633;
+      color: white;
+    }
+
+    #loading {
+      text-align: center;
+      font-size: 18px;
+      color: #c9d1d9;
+      padding: 50px;
+    }
+
+    .modal-content {
+      background: rgba(54, 57, 63, 0.95);
+      backdrop-filter: blur(10px);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 12px;
+      padding: 24px;
+      width: 95%;
+      max-width: none;
+      max-height: 90vh;
+      overflow-y: auto;
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
+    }
+
+    #not-admin {
+      text-align: center;
+      color: #da3633;
+      background: #161b22;
+      padding: 40px;
+      border-radius: 12px;
+      border: 1px solid #30363d;
+      margin: 100px auto;
+    }
+
+    #not-admin h2 {
+      color: #c9d1d9;
+      margin-bottom: 15px;
+    }
+
+    #not-admin a {
+      color: #58a6ff;
+      text-decoration: none;
+    }
+
+    #not-admin a:hover {
+      text-decoration: underline;
+    }
+
+    @media(max-width:600px) {
+      #adminApp {
+        padding: 15px;
+        margin: 20px;
+      }
+
+      nav h3 {
+        font-size: 1.2em;
+      }
+
+      .button-group {
+        flex-direction: column;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <nav>
+    <div id='nav-left'>
+      <h3 style="cursor: pointer;" onclick="window.location.href = './games.html?admin=True'" title="Games">
+        GAMER Hubs - Admin
+      </h3>
+
+    </div>
+    <div id="nav-right">
+      <img src="images/panic.png" alt="Panic Button" id="panic-button"
+        onclick="window.location.href='https://classroom.google.com'" title="Panic Button - Go to Google">
+      <img src="images/chat.png" alt="Chat" id="chat-button"
+        onclick="window.location.href='https://lolfactor39.github.io/chat/'" title="Chat with firends like discord!">
+      <h3 id="home-button" style="cursor: pointer;" onclick="window.location.href='./settings.html'" title="Home">
+        Settings</h3>
+      <h3 style="cursor:pointer;" onclick="window.location.href = './about.html'" title="About Me">
+        About Me
+      </h3>
+
+    </div>
+  </nav>
+  <script src="js/user.js"></script>
+  <script src="js/antiblock.js"></script>
+  <div id="loading">Loading...</div>
+
+  <div id="admin-content" style="display: none;">
+    <div id="adminApp">
+      <h1>Admin Control Panel</h1>
+
+      <div class="message-section">
+        <h2>Universal Message</h2>
+        <form id="message-form">
+          <textarea id="message-text" placeholder="Enter a message to display to all users..."></textarea>
+          <div class="button-group">
+            <button type="submit" class="primary">Set Message</button>
+            <button type="button" id="clear-message" class="danger">Clear Message</button>
+          </div>
+        </form>
+        <p id="status"></p>
+      </div>
+    </div>
+  </div>
+
+  <div id="not-admin" style="display: none;">
+    <h2>Access Denied</h2>
+    <p>You must be logged in as an administrator to access this page.</p>
+    <p><a href="games.html?admin=False">← Back to Games</a></p>
+  </div>
+
+  <script src="js/configstuff.js"></script>
+  <script src="js/user.js"></script>
+  <script src="js/antiblock.js"></script>
+  <script src="js/uttils.js"></script>
+  <script src="js/settings-loader.js"></script>
+  <script>
+    let uids = sessionStorage.getItem('uid');
+    trackUser(uids);
+    trackUserOnlineStatus(uids);
+  </script>
+  <script>
+    const adminContent = document.getElementById('admin-content');
+    const notAdmin = document.getElementById('not-admin');
+    const loading = document.getElementById('loading');
+
+    function onUserChange(callback) {
+      firebase.auth().onAuthStateChanged(user => {
+        if (user) {
+          db.ref(`users/${user.uid}`).once('value').then(snap => {
+            callback(snap.val());
+          });
+        } else {
+          callback(null);
+        }
+      });
+    }
+
+    // Check authentication and admin role
+    onUserChange(profile => {
+      loading.style.display = 'none';
+      if (profile && profile.role === 'admin') {
+        adminContent.style.display = 'block';
+        notAdmin.style.display = 'none';
+
+        // Load current message
+        db.ref('info/message').once('value').then(snap => {
+          if (snap.exists()) {
+            document.getElementById('message-text').value = snap.val();
+          }
+        });
+      } else {
+        adminContent.style.display = 'none';
+        notAdmin.style.display = 'block';
+      }
+    });
+
+    document.getElementById('message-form').addEventListener('submit', e => {
+      e.preventDefault();
+      const message = document.getElementById('message-text').value.trim();
+      const statusEl = document.getElementById('status');
+
+      db.ref('info/message').set(message).then(() => {
+        statusEl.textContent = 'Message updated successfully!';
+        statusEl.className = 'success';
+        setTimeout(() => statusEl.textContent = '', 3000);
+      }).catch(err => {
+        statusEl.textContent = 'Error: ' + err.message;
+        statusEl.className = 'error';
+      });
+    });
+
+    document.getElementById('clear-message').addEventListener('click', () => {
+      const statusEl = document.getElementById('status');
+
+      db.ref('info/message').remove().then(() => {
+        document.getElementById('message-text').value = '';
+        statusEl.textContent = 'Message cleared!';
+        statusEl.className = 'success';
+        setTimeout(() => statusEl.textContent = '', 3000);
+      }).catch(err => {
+        statusEl.textContent = 'Error: ' + err.message;
+        statusEl.className = 'error';
+      });
+    });
+  </script>
+</body>
+
+</html>

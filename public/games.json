@@ -1,0 +1,392 @@
+{
+    "1.8.8": {
+        "web": "learnmathforfree.gitlab.io/vol-1/1.8.8/index.html"
+    },
+    "1v1.lol": {
+        "web": "learnmathforfree.gitlab.io/vol-1/1v1.lol/index.html"
+    },
+    "2048": {
+        "web": "learnmathforfree.gitlab.io/vol-1/2048/index.html"
+    },
+    "kirka-proxy": {
+        "web": "../active/loader.html?q=aHR0cHM6Ly9raXJrYS5pby8="
+    },
+    "kirka": {
+        "web": "../active/loader.html?q=aHR0cHM6Ly9raXJrYS5pby8="
+    },
+    "crazygames-proxy": {
+        "web": "../active/loader.html?q=aHR0cHM6Ly93d3cuY3JhenlnYW1lcy5jb20v"
+    },
+    "crazygames": {
+        "web": "../active/loader.html?q=aHR0cHM6Ly93d3cuY3JhenlnYW1lcy5jb20v"
+    },
+    "poki-proxy": {
+        "web": "../active/loader.html?q=aHR0cHM6Ly9wb2tpLmNvbS8="
+    },
+    "poki": {
+        "web": "../active/loader.html?q=aHR0cHM6Ly9wb2tpLmNvbS8="
+    },
+    "geforcenow-proxy": {
+        "web": "../active/loader.html?q=aHR0cHM6Ly9wbGF5LmdlZm9yY2Vub3cuY29tLw=="
+    },
+    "geforcenow": {
+        "web": "../active/loader.html?q=aHR0cHM6Ly9wbGF5LmdlZm9yY2Vub3cuY29tLw=="
+    },
+    "add-game": {
+        "web": "learnmathforfree.gitlab.io/vol-1/add-game/index.html"
+    },
+    "aquapark.io": {
+        "web": "learnmathforfree.gitlab.io/vol-1/aquapark.io/index.html"
+    },
+    "basket-random": {
+        "web": "learnmathforfree.gitlab.io/vol-1/basket-random/index.html"
+    },
+    "basketball-legends": {
+        "web": "learnmathforfree.gitlab.io/vol-1/basketball-legends/index.html"
+    },
+    "bit-life": {
+        "web": "learnmathforfree.gitlab.io/vol-1/bit-life/index.html"
+    },
+    "block-blast": {
+        "web": "learnmathforfree.gitlab.io/vol-1/block-blast/index.html"
+    },
+    "chrome-dino": {
+        "web": "learnmathforfree.gitlab.io/vol-1/chrome-dino/index.html"
+    },
+    "clusterrush": {
+        "web": "learnmathforfree.gitlab.io/vol-1/clusterrush/index.html"
+    },
+    "cookieclicker": {
+        "web": "learnmathforfree.gitlab.io/vol-1/cookieclicker/index.html"
+    },
+    "cookieclicker-updated": {
+        "web": "learnmathforfree.gitlab.io/vol-1/cookieclicker-updated/index.html"
+    },
+    "crossy-road": {
+        "web": "learnmathforfree.gitlab.io/vol-1/crossy-road/index.html"
+    },
+    "deltarune": {
+        "web": "learnmathforfree.gitlab.io/vol-2/deltarune/index.html"
+    },
+    "doge-miner": {
+        "web": "learnmathforfree.gitlab.io/vol-2/doge-miner/index.html"
+    },
+    "doodle-jump": {
+        "web": "learnmathforfree.gitlab.io/vol-2/doodle-jump/index.html"
+    },
+    "draw-the-hill": {
+        "web": "learnmathforfree.gitlab.io/vol-2/draw-the-hill/index.html"
+    },
+    "drift-boss": {
+        "web": "learnmathforfree.gitlab.io/vol-2/drift-boss/index.html"
+    },
+    "drive-mad": {
+        "web": "learnmathforfree.gitlab.io/vol-2/drive-mad/index.html"
+    },
+    "dune": {
+        "web": "learnmathforfree.gitlab.io/vol-2/dune/index.html"
+    },
+    "eggy-car": {
+        "web": "learnmathforfree.gitlab.io/vol-2/eggy-car/index.html"
+    },
+    "flappy-bird": {
+        "web": "learnmathforfree.gitlab.io/vol-2/flappy-bird/index.html"
+    },
+    "flash": {
+        "web": "learnmathforfree.gitlab.io/vol-2/flash/index.html"
+    },
+    "FNAF-UCN": {
+        "web": "learnmathforfree.gitlab.io/vol-2/FNAF-UCN/index.html"
+    },
+    "flappy": {
+        "web": "learnmathforfree.gitlab.io/vol-2/flash/#flappy"
+    },
+    "riddle-transfer": {
+        "web": "learnmathforfree.gitlab.io/vol-2/flash/#riddle-transfer"
+    },
+    "escape-the-freezer": {
+        "web": "learnmathforfree.gitlab.io/vol-2/flash/#escape-the-freezer"
+    },
+    "minesweeper": {
+        "web": "learnmathforfree.gitlab.io/vol-2/flash/#minesweeper"
+    },
+    "rogue-soul-2": {
+        "web": "learnmathforfree.gitlab.io/vol-2/flash/#rogue-soul-2"
+    },
+    "achievement-unlocked-2": {
+        "web": "learnmathforfree.gitlab.io/vol-2/flash/#achievement-unlocked-2"
+    },
+    "escape-the-phonebooth": {
+        "web": "learnmathforfree.gitlab.io/vol-2/flash/#escape-the-phonebooth"
+    },
+    "rogue-soul": {
+        "web": "learnmathforfree.gitlab.io/vol-2/flash/#rogue-soul"
+    },
+    "achievement-unlocked-3": {
+        "web": "learnmathforfree.gitlab.io/vol-2/flash/#achievement-unlocked-3"
+    },
+    "escape-the-shack": {
+        "web": "learnmathforfree.gitlab.io/vol-2/flash/#escape-the-shack"
+    },
+    "stealing-the-diamond": {
+        "web": "learnmathforfree.gitlab.io/vol-2/flash/#stealing-the-diamond"
+    },
+    "achievement-unlocked": {
+        "web": "learnmathforfree.gitlab.io/vol-2/flash/#achievement-unlocked"
+    },
+    "escaping-the-prison": {
+        "web": "learnmathforfree.gitlab.io/vol-2/flash/#escaping-the-prison"
+    },
+    "stick-war": {
+        "web": "learnmathforfree.gitlab.io/vol-2/flash/#stick-war"
+    },
+    "age-of-war-hacked": {
+        "web": "learnmathforfree.gitlab.io/vol-2/flash/#age-of-war-hacked"
+    },
+    "factory-balls": {
+        "web": "learnmathforfree.gitlab.io/vol-2/flash/#factory-balls"
+    },
+    "submachine-0": {
+        "web": "learnmathforfree.gitlab.io/vol-2/flash/#submachine-0"
+    },
+    "age-of-war": {
+        "web": "learnmathforfree.gitlab.io/vol-2/flash/#age-of-war"
+    },
+    "flash-chess": {
+        "web": "learnmathforfree.gitlab.io/vol-2/flash/#flash-chess"
+    },
+    "run-1": {
+        "web": "learnmathforfree.gitlab.io/vol-2/flash/#run-1"
+    },
+    "run-3": {
+        "web": "learnmathforfree.gitlab.io/vol-2/flash/#run-3"
+    },
+    "run-2": {
+        "web": "learnmathforfree.gitlab.io/vol-2/flash/#run-2"
+    },
+    "infiltratingtheairship": {
+        "web": "learnmathforfree.gitlab.io/vol-2/flash/#infiltratingtheairship"
+    },
+    "submachine-10": {
+        "web": "learnmathforfree.gitlab.io/vol-2/flash/#submachine-10"
+    },
+    "bloons-td-1": {
+        "web": "learnmathforfree.gitlab.io/vol-2/flash/#bloons-td-1"
+    },
+    "fleeing-the-complex": {
+        "web": "learnmathforfree.gitlab.io/vol-2/flash/#fleeing-the-complex"
+    },
+    "submachine-2": {
+        "web": "learnmathforfree.gitlab.io/vol-2/flash/#submachine-2"
+    },
+    "bloons-td-2": {
+        "web": "learnmathforfree.gitlab.io/vol-2/flash/#bloons-td-2"
+    },
+    "gun-mayhem-2": {
+        "web": "learnmathforfree.gitlab.io/vol-2/flash/#gun-mayhem-2"
+    },
+    "submachine-3": {
+        "web": "learnmathforfree.gitlab.io/vol-2/flash/#submachine-3"
+    },
+    "bloons-td-3": {
+        "web": "learnmathforfree.gitlab.io/vol-2/flash/#bloons-td-3"
+    },
+    "gun-mayhem": {
+        "web": "learnmathforfree.gitlab.io/vol-2/flash/#gun-mayhem"
+    },
+    "submachine-32-chambers": {
+        "web": "learnmathforfree.gitlab.io/vol-2/flash/#submachine-32-chambers"
+    },
+    "bloons-td-4": {
+        "web": "learnmathforfree.gitlab.io/vol-2/flash/#bloons-td-4"
+    },
+    "infiltrating-the-airship": {
+        "web": "learnmathforfree.gitlab.io/vol-2/flash/#infiltrating-the-airship"
+    },
+    "submachine-4": {
+        "web": "learnmathforfree.gitlab.io/vol-2/flash/#submachine-4"
+    },
+    "bloons": {
+        "web": "learnmathforfree.gitlab.io/vol-2/flash/#bloons"
+    },
+    "learn-to-fly-2": {
+        "web": "learnmathforfree.gitlab.io/vol-2/flash/#learn-to-fly-2"
+    },
+    "submachine-5": {
+        "web": "learnmathforfree.gitlab.io/vol-2/flash/#submachine-5"
+    },
+    "bloxorz": {
+        "web": "learnmathforfree.gitlab.io/vol-2/flash/#bloxorz"
+    },
+    "learn-to-fly-3": {
+        "web": "learnmathforfree.gitlab.io/vol-2/flash/#learn-to-fly-3"
+    },
+    "submachine-6": {
+        "web": "learnmathforfree.gitlab.io/vol-2/flash/#submachine-6"
+    },
+    "breaking-the-bank": {
+        "web": "learnmathforfree.gitlab.io/vol-2/flash/#breaking-the-bank"
+    },
+    "learn-to-fly-idle": {
+        "web": "learnmathforfree.gitlab.io/vol-2/flash/#learn-to-fly-idle"
+    },
+    "submachine-7": {
+        "web": "learnmathforfree.gitlab.io/vol-2/flash/#submachine-7"
+    },
+    "cat-ninja": {
+        "web": "learnmathforfree.gitlab.io/vol-2/flash/#cat-ninja"
+    },
+    "learn-to-fly": {
+        "web": "learnmathforfree.gitlab.io/vol-2/flash/#learn-to-fly"
+    },
+    "submachine-8": {
+        "web": "learnmathforfree.gitlab.io/vol-2/flash/#submachine-8"
+    },
+    "creative-kill-chamber": {
+        "web": "learnmathforfree.gitlab.io/vol-2/flash/#creative-kill-chamber"
+    },
+    "papas-freezeria": {
+        "web": "learnmathforfree.gitlab.io/vol-2/flash/#papas-freezeria"
+    },
+    "submachine-9": {
+        "web": "learnmathforfree.gitlab.io/vol-2/flash/#submachine-9"
+    },
+    "curveball": {
+        "web": "learnmathforfree.gitlab.io/vol-2/flash/#curveball"
+    },
+    "papas-pizzaria": {
+        "web": "learnmathforfree.gitlab.io/vol-2/flash/#papas-pizzaria"
+    },
+    "submachine-flf": {
+        "web": "learnmathforfree.gitlab.io/vol-2/flash/#submachine-flf"
+    },
+    "dont-escape-2": {
+        "web": "learnmathforfree.gitlab.io/vol-2/flash/#dont-escape-2"
+    },
+    "raft-wars-2": {
+        "web": "learnmathforfree.gitlab.io/vol-2/flash/#raft-wars-2"
+    },
+    "submachine": {
+        "web": "learnmathforfree.gitlab.io/vol-2/flash/#submachine"
+    },
+    "dont-escape-3": {
+        "web": "learnmathforfree.gitlab.io/vol-2/flash/#dont-escape-3"
+    },
+    "raft-wars": {
+        "web": "learnmathforfree.gitlab.io/vol-2/flash/#raft-wars"
+    },
+    "sugar-sugar": {
+        "web": "learnmathforfree.gitlab.io/vol-2/flash/#sugar-sugar"
+    },
+    "riddle-school-2": {
+        "web": "learnmathforfree.gitlab.io/vol-2/flash/#riddle-school-2"
+    },
+    "the-impossible-quiz": {
+        "web": "learnmathforfree.gitlab.io/vol-2/flash/#the-impossible-quiz"
+    },
+    "duck-life-2": {
+        "web": "learnmathforfree.gitlab.io/vol-2/flash/#duck-life-2"
+    },
+    "riddle-school-3": {
+        "web": "learnmathforfree.gitlab.io/vol-2/flash/#riddle-school-3"
+    },
+    "this-is-the-only-level-2": {
+        "web": "learnmathforfree.gitlab.io/vol-2/flash/#this-is-the-only-level-2"
+    },
+    "duck-life-3": {
+        "web": "learnmathforfree.gitlab.io/vol-2/flash/#duck-life-3"
+    },
+    "riddle-school-4": {
+        "web": "learnmathforfree.gitlab.io/vol-2/flash/#riddle-school-4"
+    },
+    "this-is-the-only-level": {
+        "web": "learnmathforfree.gitlab.io/vol-2/flash/#this-is-the-only-level"
+    },
+    "duck-life": {
+        "web": "learnmathforfree.gitlab.io/vol-2/flash/#duck-life"
+    },
+    "riddle-school-5": {
+        "web": "learnmathforfree.gitlab.io/vol-2/flash/#riddle-school-5"
+    },
+    "ultimate-chess": {
+        "web": "learnmathforfree.gitlab.io/vol-2/flash/#ultimate-chess"
+    },
+    "escape-the-bathroom": {
+        "web": "learnmathforfree.gitlab.io/vol-2/flash/#escape-the-bathroom"
+    },
+    "riddle-school": {
+        "web": "learnmathforfree.gitlab.io/vol-2/flash/#riddle-school"
+    },
+    "escape-the-car": {
+        "web": "learnmathforfree.gitlab.io/vol-2/flash/#escape-the-car"
+    },
+    "riddle-transfer-2": {
+        "web": "learnmathforfree.gitlab.io/vol-2/flash/#riddle-transfer-2"
+    },
+    "fridaynightfunkin": {
+        "web": "learnmathforfree.gitlab.io/vol-3/fridaynightfunkin/index.html"
+    },
+    "getaway-shootout": {
+        "web": "learnmathforfree.gitlab.io/vol-3/getaway-shootout/index.html"
+    },
+    "gun-spin": {
+        "web": "learnmathforfree.gitlab.io/vol-4/gun-spin/index.html"
+    },
+    "hollow-knight": {
+        "web": "learnmathforfree.gitlab.io/vol-4/hollow-knight/index.html"
+    },
+    "ice-dodo": {
+        "web": "learnmathforfree.gitlab.io/vol-4/ice-dodo/index.html"
+    },
+    "just-fall": {
+        "web": "learnmathforfree.gitlab.io/vol-4/just-fall/index.html"
+    },
+    "launcha-libre": {
+        "web": "learnmathforfree.gitlab.io/vol-4/launcha-libre/index.html"
+    },
+    "level-devil": {
+        "web": "learnmathforfree.gitlab.io/vol-4/level-devil/index.html"
+    },
+    "makedir.py": {
+        "web": "learnmathforfree.gitlab.io/vol-4/makedir.py/index.html"
+    },
+    "mario-game": {
+        "web": "learnmathforfree.gitlab.io/vol-4/mario-game/index.html"
+    },
+    "ovo": {
+        "web": "learnmathforfree.gitlab.io/vol-5/ovo/index.html"
+    },
+    "paperio2": {
+        "web": "learnmathforfree.gitlab.io/vol-5/paperio2/index.html"
+    },
+    "rocket-league": {
+        "web": "learnmathforfree.gitlab.io/vol-5/rocket-league/index.html"
+    },
+    "spacebar-clicker": {
+        "web": "learnmathforfree.gitlab.io/vol-5/spacebar-clicker/index.html"
+    },
+    "SPACEINVADERS": {
+        "web": "learnmathforfree.gitlab.io/vol-5/SPACEINVADERS/index.html"
+    },
+    "stacktris": {
+        "web": "learnmathforfree.gitlab.io/vol-5/stacktris/index.html"
+    },
+    "stickman-gta-city": {
+        "web": "learnmathforfree.gitlab.io/vol-5/stickman-gta-city/index.html"
+    },
+    "stickman-hook": {
+        "web": "learnmathforfree.gitlab.io/vol-5/stickman-hook/index.html"
+    },
+    "tanuki-Sunset": {
+        "web": "learnmathforfree.gitlab.io/vol-5/tanuki-Sunset/index.html"
+    },
+    "Tanuki-Sunset-main": {
+        "web": "learnmathforfree.gitlab.io/vol-5/Tanuki-Sunset-main/index.html"
+    },
+    "timeshooter2": {
+        "web": "learnmathforfree.gitlab.io/vol-5/timeshooter2/index.html"
+    },
+    "wbwwb": {
+        "web": "learnmathforfree.gitlab.io/vol-5/wbwwb/index.html"
+    }
+}
