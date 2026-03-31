@@ -30,29 +30,19 @@ function normalizeHeaders(headers) {
   });
 }
 
-function waitForGlobals(timeout = 10000) {
-  return new Promise((resolve, reject) => {
-    const start = Date.now();
-    const interval = setInterval(() => {
-      const bareMux = globalThis.BareMux;
-      const epoxyTransport = globalThis.EpoxyTransport?.default;
-      if (bareMux?.SetTransport && epoxyTransport) {
-        clearInterval(interval);
-        resolve({ bareMux, epoxyTransport });
-        return;
-      }
-      if (Date.now() - start > timeout) {
-        clearInterval(interval);
-        reject(
-          new Error(
-            `Timed out waiting for globals. BareMux=${!!bareMux} Epoxy=${!!epoxyTransport}`
-          )
-        );
-      }
-    }, 50);
-  });
+async function loadScript(url) {
+  console.log(`[prxy] Fetching ${url}...`);
+  const res = await fetch(url);
+  if (!res.ok) throw new Error(`Failed to fetch ${url}: ${res.status}`);
+  const code = await res.text();
+  if (!code.length) throw new Error(`Received empty response from ${url}`);
+  (0, eval)(code); // global eval
+  console.log(`[prxy] Loaded ${url} (${code.length} bytes)`);
 }
+
 async function loadScramjetAndProxy() {
+  console.log("[prxy] Loading Scramjet and transport scripts...");
+  
   const scripts = [
     "/scramjet/scramjet.codecs.js",
     "/scramjet/scramjet.config.js",
@@ -62,22 +52,24 @@ async function loadScramjetAndProxy() {
   ];
 
   for (const url of scripts) {
-    console.log("Fetching", url);
-    const res = await fetch(url);
-    if (!res.ok) throw new Error(`Failed to fetch ${url}: ${res.status}`);
-    const code = await res.text();
-    (0, eval)(code); // global eval
-    console.log("Loaded", url, code.length, "bytes");
+    await loadScript(url);
   }
 }
+
 async function initTransport() {
   try {
     console.log("[prxy] Loading Scramjet and transport scripts...");
     await loadScramjetAndProxy();
     
-    console.log("[prxy] Waiting for globals...");
-    const { bareMux, epoxyTransport } = await waitForGlobals();
+    console.log("[prxy] Checking for loaded globals...");
+    const bareMux = globalThis.BareMux;
+    const epoxyTransport = globalThis.EpoxyTransport?.default;
+    
+    if (!bareMux) throw new Error("BareMux not available after loading scripts");
+    if (!epoxyTransport) throw new Error("EpoxyTransport not available after loading scripts");
+    if (!bareMux.SetTransport) throw new Error("BareMux.SetTransport not available");
 
+    console.log("[prxy] Defining EpoxyRuntime transport class...");
     class EpoxyRuntime extends epoxyTransport {
       async request(remote, method, body, headers, signal) {
         return super.request(remote, method, body, normalizeHeaders(headers), signal);
@@ -96,8 +88,15 @@ async function initTransport() {
     }
 
     globalThis[TRANSPORT_NAME] = EpoxyRuntime;
+    console.log("[prxy] Setting transport with BareMux...");
     bareMux.SetTransport(TRANSPORT_NAME, { wisp: WISP_URL });
     console.log("[prxy] Bare transport initialized successfully.");
+    
+    // Expose Scramjet config globally for tab frames to access
+    if (globalThis.scramjet && globalThis.scramjet.config) {
+      globalThis.__scramjet$config = globalThis.scramjet.config;
+      console.log("[prxy] Exported Scramjet config as __scramjet$config");
+    }
   } catch (err) {
     console.error("[prxy] Transport initialization failed:", err);
     throw err;

@@ -50,11 +50,19 @@ app.use(
   "/vendor/bare-mux-v1",
   express.static(bareMuxV1DistDir, {
     setHeaders: (res, filePath) => {
-      if (filePath.endsWith(".cjs")) res.type("application/javascript");
+      if (filePath.endsWith(".cjs") || filePath.endsWith(".js")) {
+        res.type("application/javascript");
+      }
     },
   })
 );
-app.use("/vendor/epoxy", express.static(epoxyDistDir));
+app.use("/vendor/epoxy", express.static(epoxyDistDir, {
+  setHeaders: (res, filePath) => {
+    if (filePath.endsWith(".js") || filePath.endsWith(".mjs")) {
+      res.type("application/javascript");
+    }
+  }
+}));
 
 app.use("/active/runtime", express.static(activeRuntimeDir));
 app.use("/active", express.static(activeDir, { extensions: ["html"], index: ["index.html"] }));

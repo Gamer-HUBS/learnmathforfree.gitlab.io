@@ -16,10 +16,20 @@
       font: 16px/1.4 system-ui, sans-serif;
     }
     #status { opacity: 0.85; }
+    #proxy-iframe {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      border: none;
+      display: none;
+    }
   </style>
 </head>
 <body>
   <div id="status">Loading...</div>
+  <iframe id="proxy-iframe"></iframe>
   <script>
 (async function loadScramjetAndProxy() {
   const scripts = [
@@ -40,10 +50,65 @@
       console.log("[loader] Loaded", url, code.length, "bytes");
     }
 
-    const { ensureProxyReady } = await import("/active/scripts/prxy.mjs");
-    await ensureProxyReady();
-
     console.log("[loader] Scramjet + proxy initialized successfully.");
+    console.log("[loader] Global scramjet object:", globalThis.scramjet ? "available" : "not found");
+    console.log("[loader] __scramjet$config:", window.__scramjet$config ? "available" : "not found");
+    
+    // Get target URL from query parameter
+    const params = new URLSearchParams(window.location.search);
+    const targetUrl = params.get("url");
+    
+    if (!targetUrl) {
+      document.getElementById("status").textContent = "No URL specified. Use ?url=...";
+      return;
+    }
+
+    console.log("[loader] Target URL:", targetUrl);
+
+    // Wait a moment for Scramjet config to fully initialize
+    await new Promise(resolve => setTimeout(resolve, 500));
+
+    // Try different ways to access Scramjet config
+    let config = window.__scramjet$config || globalThis.scramjet?.config || globalThis.__scramjet$config;
+    
+    if (!config) {
+      console.log("[loader] Available globals:", Object.keys(globalThis).filter(k => k.includes('scramjet')));
+      document.getElementById("status").textContent = "Scramjet config not available. Check console.";
+      return;
+    }
+
+    console.log("[loader] Config prefix:", config.prefix);
+    console.log("[loader] Config codec available:", !!config.codec);
+    
+    // Encode the target URL using Scramjet's codec
+    let proxiedUrl;
+    // Hide status and show iframe
+    document.getElementById("status").style.display = "none";
+    const iframe = document.getElementById("proxy-iframe");
+    iframe.style.display = "block";
+    
+    console.log("[loader] Setting up iframe for:", targetUrl);
+    
+    // Use a proxy path prefix that the service worker will recognize and intercept
+    // Format: /proxy/<encoded_target_url>
+    // This keeps the iframe on same origin (localhost:3457) so CSP won't block
+    const proxyPath = `/proxy/${encodeURIComponent(targetUrl)}`;
+    
+    console.log("[loader] Using proxy path:", proxyPath);
+    iframe.src = proxyPath;
+    console.log("[loader] Iframe src set to proxy path, service worker will intercept and proxy");
+    
+    // Monitor iframe for content load or errors
+    iframe.onload = () => {
+      console.log("[loader] Iframe loaded successfully");
+    };
+    
+    iframe.onerror = () => {
+      console.error("[loader] Iframe failed to load");
+      document.getElementById("status").style.display = "block";
+      document.getElementById("status").textContent = "Failed to load content. Check console.";
+    };
+    
   } catch (err) {
     console.error("[loader] Failed to initialize proxy:", err);
     document.getElementById("status").textContent = "Proxy initialization failed. Check console.";
