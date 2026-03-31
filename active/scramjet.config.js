@@ -7,13 +7,7 @@ self.__scramjet$config = {
   client: "/scramjet/scramjet.client.js",
   codecs: "/scramjet/scramjet.codecs.js",
   transport: {
-    wisp:
-      (self.location.protocol === "https:" ? "wss://" : "ws://") +
-      self.location.host +
-      "/wisp/",
-    bare:
-      (self.location.protocol === "https:" ? "https://" : "http://") +
-      self.location.host +
-      "/bare/",
+    wisp: (self.location.protocol === "https:" ? "wss://" : "ws://") + self.location.host + "/wisp/",
+    bare: (self.location.protocol === "https:" ? "https://" : "http://") + self.location.host + "/bare/",
   },
 };
