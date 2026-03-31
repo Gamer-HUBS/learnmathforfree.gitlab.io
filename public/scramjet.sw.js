@@ -17,11 +17,6 @@ function normalizeHeaders(headers) {
   });
 }
 
-const { ScramjetServiceWorker, BareMux, EpoxyTransport } = self;
-const scramjet = new ScramjetServiceWorker();
-const protocol = self.location.protocol === "https:" ? "wss:" : "ws:";
-const wispUrl = `${protocol}//${self.location.host}/wisp/`;
-
 if (BareMux && EpoxyTransport) {
   class EpoxyRuntime extends EpoxyTransport.default {
     async request(remote, method, body, headers, signal) {
