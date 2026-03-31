@@ -71,34 +71,38 @@ async function loadScramjetAndProxy() {
   }
 }
 async function initTransport() {
-  loadScramjetAndProxy().catch((err) => { 
-    console.error("Failed to load Scramjet or transport scripts:", err);
-  });
-  console.log("[prxy] Waiting for globals...");
-  const { bareMux, epoxyTransport } = await waitForGlobals();
+  try {
+    console.log("[prxy] Loading Scramjet and transport scripts...");
+    await loadScramjetAndProxy();
+    
+    console.log("[prxy] Waiting for globals...");
+    const { bareMux, epoxyTransport } = await waitForGlobals();
 
-  class EpoxyRuntime extends epoxyTransport {
-    async request(remote, method, body, headers, signal) {
-      return super.request(remote, method, body, normalizeHeaders(headers), signal);
+    class EpoxyRuntime extends epoxyTransport {
+      async request(remote, method, body, headers, signal) {
+        return super.request(remote, method, body, normalizeHeaders(headers), signal);
+      }
+      connect(url, protocols, requestHeaders, onopen, onmessage, onclose, onerror) {
+        return super.connect(
+          url,
+          protocols,
+          normalizeHeaders(requestHeaders),
+          onopen,
+          onmessage,
+          onclose,
+          onerror
+        );
+      }
     }
-    connect(url, protocols, requestHeaders, onopen, onmessage, onclose, onerror) {
-      return super.connect(
-        url,
-        protocols,
-        normalizeHeaders(requestHeaders),
-        onopen,
-        onmessage,
-        onclose,
-        onerror
-      );
-    }
+
+    globalThis[TRANSPORT_NAME] = EpoxyRuntime;
+    bareMux.SetTransport(TRANSPORT_NAME, { wisp: WISP_URL });
+    console.log("[prxy] Bare transport initialized successfully.");
+  } catch (err) {
+    console.error("[prxy] Transport initialization failed:", err);
+    throw err;
   }
-
-  globalThis[TRANSPORT_NAME] = EpoxyRuntime;
-  bareMux.SetTransport(TRANSPORT_NAME, { wisp: WISP_URL });
-  console.log("[prxy] Bare transport initialized.");
 }
-
 export async function ensureProxyReady() {
   if (!proxyReadyPromise) {
     proxyReadyPromise = (async () => {
