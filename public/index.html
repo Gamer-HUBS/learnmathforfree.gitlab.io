@@ -170,16 +170,15 @@
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
 
-    <script src="js/configstuff.js"></script>
-    <script src="js/uttils.js"></script>
-    <script src="js/settings-loader.js"></script>
+    <script src="/js/configstuff.js"></script>
+    <script src="/js/uttils.js"></script>
+    <script src="/js/settings-loader.js"></script>
 
 
 
     <script>
 
 
-        /* ========= CLEAN NAVIGATION ========= */
         function launchIframe(src) {
             console.log("[launchIframe] Directly navigating to:", src);
             window.open(src, "_blank");
@@ -214,13 +213,12 @@
                 console.log("[openSecret] codeCookie:", codeCookie, "codeFree:", codeFree);
 
                 if (!codeCookie && !codeFree) {
-                    // Navigate directly instead of framing
-                    window.location.href = "./theactualindex.html";
+                    window.location.href = '/k12/portal/load/new';
                     return;
                 }
 
                 if (codeFree) {
-                    launchIframe("./main.html?free=True");
+                    launchIframe("/k12/portal/load/new?free=True");
                     return;
                 }
 
@@ -242,7 +240,7 @@
                     window.location.href = "https://google.com";
                 }
                 else {
-                    const src = role === "admin" ? "./main.html?admin=True" : "./main.html?admin=False";
+                    const src = role === "admin" ? "/k12/portal/load/new?admin=True" : "/k12/portal/load/new?admin=False";
                     launchIframe(src);
                 }
 

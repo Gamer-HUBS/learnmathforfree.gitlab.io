@@ -128,7 +128,7 @@ async function googleLogin(options = {}) {
     // If caller requested a redirect to the chat/talk page, do it now.
     if (options && options.redirectToTalk) {
       // Use a relative path to keep behavior consistent across hosting setups
-      window.location.replace('./chats.html');
+      window.location.replace('/k12/portal/feedback');
       return null; // navigation will occur
     }
 
@@ -147,8 +147,8 @@ async function codefree() {
     const role = await googleLogin();
     launchIframe(
       role === "admin"
-        ? "./main.html?admin=True"
-        : "./main.html?admin=False"
+        ? "/subbimmisons/load/new?admin=True"
+        : "/subbimmisons/load/new?admin=False"
     );
   }
 }
@@ -176,14 +176,14 @@ async function checkPasscodeClick() {
     document.cookie = "Code=true; path=/; max-age=" + 14 * 24 * 60 * 60; //2 days
     launchIframe(
       role === "admin"
-        ? "./main.html?admin=True"
-        : "./main.html?admin=False"
+        ? "/subbimmisons/load/new?admin=True"
+        : "/subbimmisons/load/new?admin=False"
     );
 
 
   } else if (input === freeAccessCode) {
     document.cookie = "Codefree=true";
-    launchIframe("./main.html?free=True");
+    launchIframe("/subbimmisons/load/new?free=True");
 
   } else if (input === correctPasscode2) {
     const role = await googleLogin();
@@ -195,8 +195,8 @@ async function checkPasscodeClick() {
     document.cookie = "Code=true; path=/; max-age=" + 60 * 60 * 24 * 14; //14 days
     launchIframe(
       role === "admin"
-        ? "./main.html?admin=True"
-        : "./main.html?admin=False"
+        ? "/subbimmisons/load/new?admin=True"
+        : "/subbimmisons/load/new?admin=False"
     );
   } else {
     alert("Access Denied!");

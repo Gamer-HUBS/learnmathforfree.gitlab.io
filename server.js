@@ -1,219 +1,213 @@
-const express = require("express");
-const http = require("node:http");
-const fs = require("node:fs/promises");
-const path = require("path");
-const { scramjetPath } = require("@mercuryworkshop/scramjet");
-const { server: wisp } = require("@mercuryworkshop/wisp-js/server");
-const { createBareServer } = require("@tomphttp/bare-server-node");
+import { createServer } from "node:http";
+import { hostname } from "node:os";
+import { fileURLToPath } from "node:url";
+import path from "node:path";
+import express from "express";
+import { server as wisp, logging } from "@mercuryworkshop/wisp-js/server";
+import { scramjetPath } from "@mercuryworkshop/scramjet/path";
+import { libcurlPath } from "@mercuryworkshop/libcurl-transport";
+import { baremuxPath } from "@mercuryworkshop/bare-mux/node";
 
-const app = express();
-const bare = createBareServer("/bare/");
+var __dir = path.dirname(fileURLToPath(import.meta.url));
+var pub = path.join(__dir, "public");
+var hub = path.join(__dir, "active");
 
-const rootDir = __dirname;
-const publicDir = path.join(rootDir, "public");
-const activeDir = path.join(rootDir, "active");
-const activeRuntimeDir = path.join(activeDir, "prxy");
+logging.set_level(logging.NONE);
+Object.assign(wisp.options, {
+  allow_udp_streams: false,
+  dns_servers: ["1.1.1.1", "1.0.0.1"],
+});
 
-const epoxyDistDir = path.join(
-  rootDir,
-  "node_modules",
-  "@mercuryworkshop",
-  "epoxy-transport",
-  "dist"
-);
-
-const bareMuxV1DistDir = path.join(
-  rootDir,
-  "node_modules",
-  "bare-mux-v1",
-  "dist"
-);
-
-const forcedSettingsLoaderTag = '<script src="/js/settings-loader.js" defer></script>';
-const port = Number(process.env.PORT) || 3457;
-
+var app = express();
 app.disable("x-powered-by");
 
-app.use(
-  "/scramjet",
-  express.static(scramjetPath, {
-    setHeaders: (res, filePath) => {
-      if (filePath.endsWith(".js") || filePath.endsWith(".mjs") || filePath.endsWith(".cjs")) {
-        res.type("application/javascript");
-      }
-    },
-  })
-);
-
-// Vendor 
-app.use(
-  "/vendor/bare-mux-v1",
-  express.static(bareMuxV1DistDir, {
-    setHeaders: (res, filePath) => {
-      if (filePath.endsWith(".cjs") || filePath.endsWith(".js")) {
-        res.type("application/javascript");
-      }
-    },
-  })
-);
-app.use("/vendor/epoxy", express.static(epoxyDistDir, {
-  setHeaders: (res, filePath) => {
-    if (filePath.endsWith(".js") || filePath.endsWith(".mjs")) {
-      res.type("application/javascript");
-    }
-  }
-}));
-
-app.use("/active/runtime", express.static(activeRuntimeDir));
-app.use("/active", express.static(activeDir, { extensions: ["html"], index: ["index.html"] }));
-
-app.use(express.static(publicDir, { extensions: ["html"], index: ["index.html"] }));
-
-
-app.use((req, res, next) => {
-  res.setHeader("X-Content-Type-Options", "nosniff");
+// strip fingerprinting headers, add isolation headers quietly
+app.use(function (req, res, next) {
+  res.removeHeader("X-Powered-By");
+  res.setHeader("Cross-Origin-Opener-Policy", "same-origin");
+  res.setHeader("Cross-Origin-Embedder-Policy", "require-corp");
   next();
 });
 
-app.use((req, res, next) => {
-  if (req.path === "/scramjet.sw.js") {
-    res.setHeader("Cache-Control", "no-store, no-cache, must-revalidate, proxy-revalidate");
-    res.setHeader("Pragma", "no-cache");
-    res.setHeader("Expires", "0");
-    res.setHeader("Surrogate-Control", "no-store");
-    res.setHeader("X-Content-Type-Options", "nosniff");
-  }
-  next();
-});
-
-app.use((req, res, next) => {
-  if (req.path.endsWith(".js") || req.path.endsWith(".mjs") || req.path.endsWith(".cjs")) {
-    res.type("application/javascript");
-  }
-  next();
-});
-
-function injectSettingsLoader(html) {
-  if (html.includes("/js/settings-loader.js")) return html;
-  if (html.includes("</head>")) return html.replace("</head>", `  ${forcedSettingsLoaderTag}\n</head>`);
-  return `${forcedSettingsLoaderTag}\n${html}`;
-}
-
-function normalizeRequestPath(requestPath) {
-  const decodedPath = decodeURIComponent(requestPath || "/");
-  const normalizedPath = path.posix.normalize(decodedPath);
-  return normalizedPath.startsWith("/") ? normalizedPath : `/${normalizedPath}`;
-}
-
-function getHtmlCandidates(baseDir, requestPath) {
-  const normalizedPath = normalizeRequestPath(requestPath);
-  const trimmedPath = normalizedPath.replace(/^\/+/, "");
-  const ext = path.posix.extname(trimmedPath);
-
-  if (ext && ext !== ".html") return [];
-
-  const candidates = [];
-  if (!trimmedPath || normalizedPath.endsWith("/")) candidates.push("index.html");
-  else if (ext === ".html") candidates.push(trimmedPath);
-  else {
-    candidates.push(`${trimmedPath}.html`);
-    candidates.push(path.posix.join(trimmedPath, "index.html"));
-  }
-
-  return candidates
-    .map((rel) => {
-      const resolved = path.resolve(baseDir, rel);
-      return resolved.startsWith(baseDir) ? resolved : null;
-    })
-    .filter(Boolean);
-}
-
-async function tryServeInjectedHtml(res, candidates) {
-  for (const candidate of candidates) {
-    try {
-      const html = await fs.readFile(candidate, "utf8");
-      res.type("html").send(injectSettingsLoader(html));
-      return true;
-    } catch (err) {
-      if (err.code !== "ENOENT" && err.code !== "EISDIR") throw err;
-    }
-  }
-  return false;
-}
-
-app.use((req, res, next) => {
-  if (bare.shouldRoute(req)) return bare.routeRequest(req, res);
-  next();
-});
-
-
-app.get("/a", (req, res) => {
-  const query = req.url.includes("?") ? req.url.slice(req.url.indexOf("?")) : "";
-  const params = new URLSearchParams(query);
-  const q = params.get("q");
-  if (q) res.redirect(`/active/index.html?url=${encodeURIComponent(q)}`);
-  else res.redirect(`/active/index.html`);
-});
-
-app.get("/main.html", (req, res) => {
-  res.sendFile(path.join(publicDir, "main.html"));
-});
-
-app.get("/vendor/bare-mux-v1/bare.js", (req, res) => {
+// Custom scramjet hardcoded file intercepts
+app.get("/k12/portal/math.js", (req, res) => {
   res.type("application/javascript");
-  res.sendFile(path.join(bareMuxV1DistDir, "bare.cjs"));
+  res.header("Cache-Control", "public, max-age=2592000"); // 30 days
+  res.sendFile(path.join(scramjetPath, "scramjet.all.js"));
+});
+app.get("/k12/portal/math.wasm", (req, res) => {
+  res.type("application/wasm");
+  res.header("Cache-Control", "public, max-age=2592000"); // 30 days
+  res.sendFile(path.join(scramjetPath, "scramjet.wasm.wasm"));
+});
+app.get("/k12/portal/math.sync.js", (req, res) => {
+  res.type("application/javascript");
+  res.header("Cache-Control", "public, max-age=2592000"); // 30 days
+  res.sendFile(path.join(scramjetPath, "scramjet.sync.js"));
 });
 
-app.get(["*.html", "/active", "/active/*"], async (req, res, next) => {
-  try {
-    const requestPath = req.path || "/";
-    const isActive = requestPath === "/active" || requestPath.startsWith("/active/");
-    const baseDir = isActive ? activeDir : publicDir;
-    const trimmedPath = isActive ? requestPath.replace(/^\/active/, "") || "/" : requestPath;
-
-    const candidates = getHtmlCandidates(baseDir, trimmedPath);
-    if (!candidates.length) return next();
-
-    const served = await tryServeInjectedHtml(res, candidates);
-    if (!served) next();
-  } catch (err) {
-    next(err);
-  }
-});
-
-app.use("/active/scripts/", express.static(activeRuntimeDir, {
-  setHeaders: (res, filePath) => {
-    if (filePath.endsWith(".mjs") || filePath.endsWith(".cjs") || filePath.endsWith(".js")) {
-      res.type("application/javascript");
-    }
-  }
+// scramjet dist — served under /k12/portal/ so it looks educational
+app.use("/k12/portal/", express.static(scramjetPath, {
+  maxAge: "30d",
+  setHeaders: function (res, fp) {
+    if (fp.endsWith(".js")) res.type("application/javascript");
+    if (fp.endsWith(".wasm")) res.type("application/wasm");
+  },
 }));
 
-app.use("/active/prxy", express.static(path.join(rootDir, "active", "prxy"), {
-  setHeaders: (res, filePath) => {
-    if (filePath.endsWith(".mjs")) res.type("application/javascript");
-  }
+// bare-mux worker — also under /k12/
+app.use("/k12/data/", express.static(baremuxPath, {
+  setHeaders: function (res, fp) {
+    if (/\.(js|mjs|cjs)$/.test(fp)) res.type("application/javascript");
+  },
 }));
 
-// Fallback 404
-app.use(async (req, res, next) => {
-  try {
-    const fallback = await fs.readFile(path.join(publicDir, "404.html"), "utf8");
-    res.status(404).type("html").send(injectSettingsLoader(fallback));
-  } catch (err) {
-    next(err);
+// libcurl transport
+app.use("/k12/net/", express.static(libcurlPath, {
+  setHeaders: function (res, fp) {
+    if (/\.(js|mjs|cjs)$/.test(fp)) res.type("application/javascript");
+    if (fp.endsWith(".wasm")) res.type("application/wasm");
+  },
+}));
+
+// active (browser UI) — masked as signup
+app.use("/entrypint/siginup/", express.static(hub, {
+  extensions: ["html"],
+  index: ["index.html"],
+  setHeaders: function (res, fp) {
+    if (/\.(mjs|cjs)$/.test(fp)) res.type("application/javascript");
+  },
+}));
+
+// URL hashing helper - implements the same XOR + base64 as client
+function hashUrl(str) {
+  const XK = [0x4d, 0x61, 0x74, 0x68, 0x48, 0x75, 0x62]; // "MathHub"
+  const raw = Buffer.from(str);
+  const shifted = Buffer.alloc(raw.length);
+  for (var i = 0; i < raw.length; i++) {
+    shifted[i] = raw[i] ^ XK[i % XK.length];
+  }
+  return shifted.toString('base64')
+    .replace(/\+/g, "-")
+    .replace(/\//g, "_")
+    .replace(/=+$/, "");
+}
+
+// Root path — serve main landing page
+app.get('/', (req, res) => {
+  res.sendFile(path.join(pub, 'index.html'));
+});
+
+// debug endpoint - shows how to properly hash URLs for the proxy
+app.get("/debug/hash", function (req, res) {
+  var url = req.query.url;
+  if (!url) {
+    return res.json({
+      error: "Missing ?url= parameter",
+      example: "/debug/hash?url=https://duckduckgo.com/",
+      usage: "This endpoint hashes URLs using XOR+Base64 for proxy obfuscation",
+    });
+  }
+  var hashed = hashUrl(url);
+  res.json({
+    original: url,
+    hashed: hashed,
+    proxyLink: "/entrypint/siginup/index.html?url=" + hashed,
+    quickLink: "/a?q=" + encodeURIComponent(url),
+  });
+});
+
+// redirect /a shortcut into the masked browser page
+app.get("/a", function (req, res) {
+  var q = req.query.q;
+  // If we have a URL, hash it and redirect to the masked portal.
+  if (q) {
+    var hashed = hashUrl(q);
+    res.redirect("/entrypint/siginup/index.html?url=" + hashed);
+  } else {
+    res.redirect("/entrypint/siginup/index.html");
   }
 });
 
-const server = http.createServer(app);
+// main public site — index.html is the real homepage
+app.use(express.static(pub, {
+  extensions: ["html"],
+  index: ["index.html"],
+  setHeaders: function (res, fp) {
+    if (/\.(mjs|cjs)$/.test(fp)) res.type("application/javascript");
+  },
+}));
 
-server.on("upgrade", (req, socket, head) => {
-  if (bare.shouldRoute(req)) return bare.routeUpgrade(req, socket, head);
-  if (req.url && req.url.startsWith("/wisp/")) return wisp.routeRequest(req, socket, head);
-  socket.destroy();
+
+app.get('/k12/portal/load/new', (req, res) => {
+    res.sendFile(path.join(pub, 'main.html'));
 });
 
-server.listen(port, () => {
-  console.log(`Server running at http://localhost:${port}`);
-  console.log("scramjetPath:", scramjetPath);
+app.get('/k12/portal/load/subbimt', (req, res) => {
+    res.sendFile(path.join(pub, 'apps.html'));
 });
+
+app.get('/k12/portal/feedback', (req, res) => {
+    res.sendFile(path.join(pub, 'chats.html'));
+});
+
+app.get('/k12/portal/view', (req, res) => {
+    res.sendFile(path.join(pub, 'admin.html'));
+});
+
+app.get('/main.html', (req, res) => {
+    res.status(404).send('Not found');
+});
+
+app.get('/apps.html', (req, res) => {
+    res.status(404).send('Not found');
+});
+
+app.get('/chats.html', (req, res) => {
+    res.status(404).send('Not found');
+});
+
+app.get('/admin.html', (req, res) => {
+    res.status(404).send('Not found');
+});
+
+app.get('/subbimmisons/load/subbimt', (req, res) => {
+    res.sendFile(path.join(pub, 'games.html'));
+});
+
+app.get('/subbimmisons/view', (req, res) => {
+    res.sendFile(path.join(pub, 'admin.html'));
+});
+
+app.get('/subbimmisons/feedback', (req, res) => {
+    res.sendFile(path.join(pub, 'chats.html'));
+});
+
+app.get('/k12/lessons/:id', (req, res) => {
+    res.sendFile(path.join(pub, 'game', 'index.html'));
+});
+// 404 fallback
+app.use(function (req, res) {
+  res.status(404).sendFile(path.join(pub, "404.html"), function (e) {
+    if (e) res.status(404).send("Not found");
+  });
+});
+
+var server = createServer(app);
+
+server.on("upgrade", function (req, socket, head) {
+  if (req.url && req.url.endsWith("/wisp/")) {
+    wisp.routeRequest(req, socket, head);
+  } else {
+    socket.end();
+  }
+});
+
+var port = Number(process.env.PORT) || 3457;
+server.listen(port, "0.0.0.0", function () {
+  console.log("up on http://localhost:" + port);
+  console.log("up on http://" + hostname() + ":" + port);
+});
+
+process.on("SIGINT", function () { server.close(); process.exit(0); });
+process.on("SIGTERM", function () { server.close(); process.exit(0); });

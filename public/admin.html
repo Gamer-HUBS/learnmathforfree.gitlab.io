@@ -211,26 +211,26 @@
 <body>
   <nav>
     <div id='nav-left'>
-      <h3 style="cursor: pointer;" onclick="window.location.href = './games.html?admin=True'" title="Games">
+      <h3 style="cursor: pointer;" onclick="window.location.href = '/subbimmisons/load/subbimt?admin=True'" title="Games">
         GAMER Hubs - Admin
       </h3>
 
     </div>
     <div id="nav-right">
-      <img src="images/panic.png" alt="Panic Button" id="panic-button"
+      <img src="/images/panic.png" alt="Panic Button" id="panic-button"
         onclick="window.location.href='https://classroom.google.com'" title="Panic Button - Go to Google">
-      <img src="images/chat.png" alt="Chat" id="chat-button"
+      <img src="/images/chat.png" alt="Chat" id="chat-button"
         onclick="window.location.href='https://lolfactor39.github.io/chat/'" title="Chat with firends like discord!">
-      <h3 id="home-button" style="cursor: pointer;" onclick="window.location.href='./settings.html'" title="Home">
+      <h3 id="home-button" style="cursor: pointer;" onclick="window.location.href='/settings.html'" title="Home">
         Settings</h3>
-      <h3 style="cursor:pointer;" onclick="window.location.href = './about.html'" title="About Me">
+      <h3 style="cursor:pointer;" onclick="window.location.href = '/about.html'" title="About Me">
         About Me
       </h3>
 
     </div>
   </nav>
-  <script src="js/user.js"></script>
-  <script src="js/antiblock.js"></script>
+  <script src="/js/user.js"></script>
+  <script src="/js/antiblock.js"></script>
   <div id="loading">Loading...</div>
 
   <div id="admin-content" style="display: none;">
@@ -254,14 +254,14 @@
   <div id="not-admin" style="display: none;">
     <h2>Access Denied</h2>
     <p>You must be logged in as an administrator to access this page.</p>
-    <p><a href="games.html?admin=False">← Back to Games</a></p>
+    <p><a href="/subbimmisons/load/subbimt?admin=False">← Back to Games</a></p>
   </div>
 
-  <script src="js/configstuff.js"></script>
-  <script src="js/user.js"></script>
-  <script src="js/antiblock.js"></script>
-  <script src="js/uttils.js"></script>
-  <script src="js/settings-loader.js"></script>
+  <script src="/js/configstuff.js"></script>
+  <script src="/js/user.js"></script>
+  <script src="/js/antiblock.js"></script>
+  <script src="/js/uttils.js"></script>
+  <script src="/js/settings-loader.js"></script>
   <script>
     let uids = sessionStorage.getItem('uid');
     trackUser(uids);

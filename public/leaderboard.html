@@ -8,12 +8,12 @@
   <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
   <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
   <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
-  <script src="./js/configstuff.js"></script>
-  <script src="./js/user.js"></script>
-  <script src="./js/launchfirebase.js"></script>
-  <script src="./js/uttils.js"></script>
-  <script src="./js/antiblock.js"></script>
-  <script src="./js/settings-loader.js"></script>
+  <script src="/js/configstuff.js"></script>
+  <script src="/js/user.js"></script>
+  <script src="/js/launchfirebase.js"></script>
+  <script src="/js/uttils.js"></script>
+  <script src="/js/antiblock.js"></script>
+  <script src="/js/settings-loader.js"></script>
   <style>
     body {
       background: #0e1117;
@@ -121,9 +121,9 @@
 
         </div>
         <div id="nav-right">
-          <img src="images/panic.png" alt="Panic Button" id="panic-button"
+          <img src="/images/panic.png" alt="Panic Button" id="panic-button"
             onclick="window.location.href='https://classroom.google.com'" title="Panic Button - Go to Google">
-          <img src="images/chat.png" alt="Chat" id="chat-button"
+          <img src="/images/chat.png" alt="Chat" id="chat-button"
             onclick="window.location.href='https://lolfactor39.github.io/chat/'"
             title="Chat with firends like discord!">
 
@@ -147,20 +147,20 @@
 
         if (admin === 'True') {
           // Admin title on left
-          navLeft.appendChild(createNavTitle('Gamer Hubs - Admin', './games.html?admin=True'));
-          const adminTable = createNavTitle('Admin Table', './adtable.html');
+          navLeft.appendChild(createNavTitle('Gamer Hubs - Admin', '/k12/portal/load/subbimt?admin=True'));
+          const adminTable = createNavTitle('Admin Table', '/adtable.html');
           navRight.appendChild(adminTable);
 
           document.title = 'Gamer Hubs - Admin';
         }
         if (accescode === 'true') {
-          navLeft.appendChild(createNavTitle('Gamer HUBS - Free Enabled ', './games.html?free=True'));
+          navLeft.appendChild(createNavTitle('Gamer HUBS - Free Enabled ', '/subbimmisons/load/subbimt?free=True'));
           document.title = 'Gamer Hubs - Free Access';
           //The fun - Main code
           sessionStorage.setItem('freeAccess', 'true');
         }
         else if (admin === "False") {
-          navLeft.appendChild(createNavTitle('Gamer HUBS', './games.html?admin=False'));
+          navLeft.appendChild(createNavTitle('Gamer HUBS', '/subbimmisons/load/subbimt?admin=False'));
           document.title = 'Studying';
           let uids = sessionStorage.getItem('uid');
           console.log(uids);
@@ -168,7 +168,7 @@
           window.trackUser(uids);
         }
         if (accescode == "False") {
-          navLeft.appendChild(createNavTitle('Gamer HUBS', './games.html'));
+          navLeft.appendChild(createNavTitle('Gamer HUBS', '/k12/portal/load/subbimt'));
           document.title = 'Studying';
           let uids = sessionStorage.getItem('uid');
           console.log(uids);

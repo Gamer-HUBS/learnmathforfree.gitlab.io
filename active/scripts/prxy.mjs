@@ -1,132 +1,171 @@
-import { registerSW } from "/active/prxy/register-sw.mjs";
 import { rAlert } from "./utils.mjs";
 
-const TRANSPORT_NAME = "EpoxyRuntime";
-const protocol = location.protocol === "https:" ? "wss:" : "ws:";
-const WISP_URL = `${protocol}//${location.host}/wisp/`;
+// xor key — just some bytes to scramble the url string before b64
+var XK = [0x4d, 0x61, 0x74, 0x68, 0x48, 0x75, 0x62]; // "MathHub"
 
-let proxyReadyPromise = null;
+var _ready = null;
+var _ctrl = null;
 
-export function search(input, template) {
-  try {
-    const url = new URL(input);
-    return url.toString();
-  } catch (err) {}
-  try {
-    const url = new URL(`http://${input}`);
-    if (url.hostname.includes(".")) return url.toString();
-  } catch (err) {}
-  return template.replace("%s", encodeURIComponent(input));
-}
+var wProto = (location.protocol === "https:") ? "wss:" : "ws:";
+var wURL = wProto + "//" + location.host + "/wisp/";
 
-function normalizeHeaders(headers) {
-  if (!headers) return [];
-  if (headers instanceof Headers) return Array.from(headers.entries());
-  if (Array.isArray(headers)) return headers;
-  if (typeof headers[Symbol.iterator] === "function") return Array.from(headers);
-  return Object.entries(headers).flatMap(([key, value]) => {
-    if (Array.isArray(value)) return value.map((entry) => [key, String(entry)]);
-    return [[key, String(value)]];
-  });
-}
-
-async function loadScript(url) {
-  console.log(`[prxy] Fetching ${url}...`);
-  const res = await fetch(url);
-  if (!res.ok) throw new Error(`Failed to fetch ${url}: ${res.status}`);
-  const code = await res.text();
-  if (!code.length) throw new Error(`Received empty response from ${url}`);
-  (0, eval)(code); // global eval
-  console.log(`[prxy] Loaded ${url} (${code.length} bytes)`);
-}
-
-async function loadScramjetAndProxy() {
-  console.log("[prxy] Loading Scramjet and transport scripts...");
-  
-  const scripts = [
-    "/scramjet/scramjet.codecs.js",
-    "/scramjet/scramjet.config.js",
-    "/scramjet/scramjet.bundle.js",
-    "/vendor/bare-mux-v1/bare.js",
-    "/vendor/epoxy/index.js",
-  ];
-
-  for (const url of scripts) {
-    await loadScript(url);
+function xorShift(buf) {
+  var out = new Uint8Array(buf.length);
+  for (var i = 0; i < buf.length; i++) {
+    out[i] = buf[i] ^ XK[i % XK.length];
   }
+  return out;
 }
 
-async function initTransport() {
+// encode a url so it can't be pattern-matched by content filters
+function encodeForProxy(str) {
+  var raw = new TextEncoder().encode(str);
+  var shifted = xorShift(raw);
+  // btoa needs a binary string
+  var binStr = "";
+  for (var i = 0; i < shifted.length; i++) binStr += String.fromCharCode(shifted[i]);
+  return btoa(binStr)
+    .replace(/\+/g, "-")
+    .replace(/\//g, "_")
+    .replace(/=+$/, "");
+}
+
+function decodeForProxy(enc) {
+  // undo url-safe b64
+  var b64 = enc.replace(/-/g, "+").replace(/_/g, "/");
+  var pad = 4 - (b64.length % 4);
+  if (pad < 4) b64 += "=".repeat(pad);
+  var binStr = atob(b64);
+  var buf = new Uint8Array(binStr.length);
+  for (var i = 0; i < binStr.length; i++) buf[i] = binStr.charCodeAt(i);
+  var decoded = xorShift(buf);
+  return new TextDecoder().decode(decoded);
+}
+
+// figure out if the user typed a url or wants to search
+function toUrl(input, tmpl) {
+  try { return new URL(input).toString(); } catch (e) {}
+  // try decode base64
   try {
-    console.log("[prxy] Loading Scramjet and transport scripts...");
-    await loadScramjetAndProxy();
-    
-    console.log("[prxy] Checking for loaded globals...");
-    const bareMux = globalThis.BareMux;
-    const epoxyTransport = globalThis.EpoxyTransport?.default;
-    
-    if (!bareMux) throw new Error("BareMux not available after loading scripts");
-    if (!epoxyTransport) throw new Error("EpoxyTransport not available after loading scripts");
-    if (!bareMux.SetTransport) throw new Error("BareMux.SetTransport not available");
-
-    console.log("[prxy] Defining EpoxyRuntime transport class...");
-    class EpoxyRuntime extends epoxyTransport {
-      async request(remote, method, body, headers, signal) {
-        return super.request(remote, method, body, normalizeHeaders(headers), signal);
-      }
-      connect(url, protocols, requestHeaders, onopen, onmessage, onclose, onerror) {
-        return super.connect(
-          url,
-          protocols,
-          normalizeHeaders(requestHeaders),
-          onopen,
-          onmessage,
-          onclose,
-          onerror
-        );
-      }
-    }
-
-    globalThis[TRANSPORT_NAME] = EpoxyRuntime;
-    console.log("[prxy] Setting transport with BareMux...");
-    bareMux.SetTransport(TRANSPORT_NAME, { wisp: WISP_URL });
-    console.log("[prxy] Bare transport initialized successfully.");
-    
-    // Expose Scramjet config globally for tab frames to access
-    if (globalThis.scramjet && globalThis.scramjet.config) {
-      globalThis.__scramjet$config = globalThis.scramjet.config;
-      console.log("[prxy] Exported Scramjet config as __scramjet$config");
-    }
-  } catch (err) {
-    console.error("[prxy] Transport initialization failed:", err);
-    throw err;
-  }
+    var decoded = atob(input);
+    return new URL(decoded).toString();
+  } catch (e) {}
+  try {
+    var u = new URL("http://" + input);
+    if (u.hostname.includes(".")) return u.toString();
+  } catch (e) {}
+  return tmpl.replace("%s", encodeURIComponent(input));
 }
-export async function ensureProxyReady() {
-  if (!proxyReadyPromise) {
-    proxyReadyPromise = (async () => {
-      await registerSW();
-      await initTransport();
-    })().catch((error) => {
-      proxyReadyPromise = null;
-      throw error;
+
+async function boot() {
+  if (!("serviceWorker" in navigator)) {
+      alert("Service Worker requires a secure context! Please access via HTTPS or http://localhost (not IP/Hostname).");
+      throw new Error("no sw support");
+  }
+
+  console.log("[Proxy] Starting boot sequence...");
+
+  // Verify Scramjet globals are loaded
+  if (typeof $scramjetLoadController === 'undefined') {
+    throw new Error("Scramjet not loaded - $scramjetLoadController is undefined. Ensure /k12/portal/math.js is loaded before proxy initialization.");
+  }
+  if (typeof BareMux === 'undefined') {
+    throw new Error("BareMux not loaded - ensure /k12/data/index.js is loaded before proxy initialization.");
+  }
+
+  console.log("[Proxy] Scramjet and BareMux globals verified");
+
+  // Clear legacy Scramjet database to prevent "NotFoundError: config store" issues
+  try {
+    const dbName = "scramjet"; // default scramjet DB name
+    const dbs = await indexedDB.databases?.();
+    const exists = dbs?.some(db => db.name === dbName);
+    if (exists || !localStorage.getItem("scramjet_v3_init")) {
+       console.log("[Proxy] Resetting Scramjet database...");
+       indexedDB.deleteDatabase(dbName);
+       localStorage.setItem("scramjet_v3_init", "true");
+    }
+  } catch (e) {
+    console.warn("[Proxy] DB reset warning:", e);
+  }
+
+  console.log("[Proxy] Registering service worker at /sw.js");
+  var reg = await navigator.serviceWorker.register("/sw.js", { scope: "/" });
+
+  if (reg.installing) {
+    console.log("[Proxy] Waiting for service worker to activate...");
+    await new Promise(function (ok, bail) {
+      reg.installing.addEventListener("statechange", function fn(e) {
+        console.log("[Proxy] Service worker state:", e.target.state);
+        if (e.target.state === "activated") { this.removeEventListener("statechange", fn); ok(); }
+        if (e.target.state === "redundant") { this.removeEventListener("statechange", fn); bail(new Error("sw died")); }
+      });
     });
   }
-  return proxyReadyPromise;
+  
+  console.log("[Proxy] Waiting for service worker ready...");
+  await navigator.serviceWorker.ready;
+  console.log("[Proxy] Service worker ready!");
+
+  // init scramjet controller with disguised paths and cache-busting version
+  console.log("[Proxy] Initializing Scramjet controller...");
+  var load = $scramjetLoadController();
+  _ctrl = new load.ScramjetController({
+    prefix: "/k12/portal/",
+    files: {
+      wasm: "/k12/portal/math.wasm",
+      all: "/k12/portal/math.js",
+      sync: "/k12/portal/math.sync.js",
+    },
+  });
+
+  console.log("[Proxy] Initializing controller...");
+  await _ctrl.init("/sw.js");
+  console.log("[Proxy] Controller initialized!");
+
+  // hook up the transport through the hidden paths
+  console.log("[Proxy] Setting up BareMux connection...");
+  console.log("[Proxy] WebSocket URL:", wURL);
+  var conn = new BareMux.BareMuxConnection("/k12/data/worker.js");
+  await conn.setTransport("/k12/net/index.mjs", [{ wisp: wURL }]);
+  console.log("[Proxy] BareMux connection ready!");
+
+  console.log("[Proxy] Proxy boot complete!");
+  return _ctrl;
 }
 
-export async function getUV(input) {
+function ready() {
+  if (!_ready) {
+    _ready = boot().catch(function (err) {
+      _ready = null;
+      throw err;
+    });
+  }
+  return _ready;
+}
+
+async function openSite(input) {
+  console.log("[Proxy] openSite called with input:", input);
   try {
-    await ensureProxyReady();
+    console.log("[Proxy] Ensuring proxy ready...");
+    var ctrl = await ready();
+    console.log("[Proxy] Proxy ready, proceeding...");
   } catch (err) {
-    rAlert(`Proxy failed to initialize.<br>${err.toString()}`);
+    console.error("[Proxy] Error during proxy initialization:", err);
+    rAlert("Couldn't start proxy.<br>" + err.toString());
     throw err;
   }
-  const url = search(input, "https://html.duckduckgo.com/html?t=h_&q=%s");
-  return `/active/loader.html?url=${encodeURIComponent(url)}`;
+  var url = toUrl(input, "https://html.duckduckgo.com/html?t=h_&q=%s");
+  console.log("[Proxy] Resolved URL:", url);
+  console.log("[Proxy] Encoding URL...");
+  var encoded = ctrl.encodeUrl(url);
+  console.log("[Proxy] Encoded URL:", encoded);
+  return encoded;
 }
 
-export async function safeProxyCall(fn) {
-  await ensureProxyReady();
-  return fn();
+function safeCall(fn) {
+  return ready().then(fn);
 }
+
+export { toUrl as search, ready as ensureProxyReady, openSite as getUV, safeCall as safeProxyCall };
+export { encodeForProxy, decodeForProxy };

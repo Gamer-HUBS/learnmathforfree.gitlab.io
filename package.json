@@ -1,9 +1,9 @@
 {
   "name": "learnmathforfree-server",
-  "version": "1.0.0",
+  "version": "2.0.0",
   "private": true,
-  "description": "Node.js server wrapper for the Learn Math For Free site",
-  "main": "server.js",
+  "description": "Node.js server wrapper for the Learn Math For Free site with Scramjet proxy",
+  "type": "module",
   "scripts": {
     "start": "node server.js",
     "dev": "node --watch server.js"
@@ -12,11 +12,10 @@
     "node": ">=18"
   },
   "dependencies": {
-    "@mercuryworkshop/epoxy-transport": "^3.0.1",
-    "@mercuryworkshop/scramjet": "^1.0.2",
+    "@mercuryworkshop/bare-mux": "^2.1.7",
+    "@mercuryworkshop/libcurl-transport": "^1.5.2",
+    "@mercuryworkshop/scramjet": "https://github.com/MercuryWorkshop/scramjet/releases/download/latest/mercuryworkshop-scramjet-2.0.0-alpha.tgz",
     "@mercuryworkshop/wisp-js": "^0.4.1",
-    "@tomphttp/bare-server-node": "^2.0.6",
-    "bare-mux-v1": "npm:@mercuryworkshop/bare-mux@^1.1.4",
     "express": "^4.21.2"
   }
 }

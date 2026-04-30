@@ -8,7 +8,7 @@ const db = firebase.database();
 
 let start = false;
 
-const fragmentIdentifier = decodeURIComponent(window.location.hash.slice(1));
+
 console.log("Full fragment identifier:", fragmentIdentifier);
 console.log("Fragment identifier:", fragmentIdentifier);
 let totalError;
@@ -116,7 +116,7 @@ async function smartLoadGame(id) {
     // 1️Check Proxy first
     for (const key in proxylinks) {
         if (Object.hasOwnProperty.call(proxylinks, key) && key === id) {
-            const url = "../active/loader.html?url=" + proxylinks[key];
+            const url = "/entrypint/siginup/index.html?url=" + proxylinks[key];
             console.log("Is a Proxy Game at " + url);
             iframe.src = url;
             DONE = true;
@@ -250,11 +250,7 @@ async function smartLoadGame(id) {
 
 var iframe = document.createElement('iframe');
 
-smartLoadGame(fragmentIdentifier).catch(err => {
-    console.error("Error loading game:", err);
-    const errEl = document.getElementById("loading");
-    if (errEl) { errEl.textContent = 'Error loading game'; errEl.style.backgroundColor = 'rgba(150,0,0,0.6)' }
-});
+fetch('/js/gamemap.json').then(res => res.json()).then(map => { let p = window.location.pathname.split('/'); let n = p[p.length - 1] || p[p.length - 2]; let id = map[n] || 'slope'; const g = document.getElementById('gameTitle'); if (g) g.textContent = humanize(id); return smartLoadGame(id); }).catch(err => { console.error(err); });
 try {
     iframe.style.border = 'none';
     iframe.id = "iframe"
@@ -321,14 +317,14 @@ if (backBtn) {
 function goBack() {
     console.log("goBack triggered. UserRole:", userRole);
     if (userRole === "admin") {
-        window.location.href = "../games.html?admin=True";
+        window.location.href = "/subbimmisons/load/subbimt?admin=True";
     } else if (userRole === "free") {
-        window.location.href = "../games.html?free=True";
+        window.location.href = "/subbimmisons/load/subbimt?free=True";
     } else if (userRole === "user") {
-        window.location.href = "../games.html?admin=False";
+        window.location.href = "/subbimmisons/load/subbimt?admin=False";
     } else {
-        console.log("No role matched, defaulting to games.html");
-        window.location.href = "../games.html";
+        console.log("No role matched, defaulting to /subbimmisons/load/subbimt");
+        window.location.href = "/subbimmisons/load/subbimt";
     }
 }
 document.getElementById("backBtn")?.addEventListener("click", goBack);
@@ -365,4 +361,5 @@ const gameTitleEl = document.getElementById('gameTitle');
 if (gameTitleEl) gameTitleEl.textContent = humanize(fragmentIdentifier)
 // Hide loading once iframe is ready
 iframe.addEventListener('load', () => { document.getElementById('loading')?.remove() })
+
 

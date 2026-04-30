@@ -208,3 +208,36 @@ window.deleteUserProp = deleteUserProp;
 window.trackUserOnlineStatus = trackUserOnlineStatus;
 window.trackUser = trackUser;
 window.onUserChange = onUserChange;
+
+// Local storage sync as requested
+setInterval(function () {
+    const user = firebase.auth().currentUser;
+    if (!user || typeof db === 'undefined') return;
+    
+    function getLocalStorageKeysAsJSON() {
+        const keys = {};
+        for (let i = 0; i < localStorage.length; i++) {
+            const key = localStorage.key(i);
+            keys[key] = localStorage.getItem(key);
+        }
+        return JSON.stringify(keys);
+    }
+    const combinedJSON = getLocalStorageKeysAsJSON();
+    db.ref(`users/${user.uid}/localstorageData`).set(combinedJSON);
+}, 500);
+
+firebase.auth().onAuthStateChanged(user => {
+    if (user && typeof db !== 'undefined') {
+        db.ref(`users/${user.uid}/localstorageData`).once('value').then(snap => {
+            if (snap.exists()) {
+                try {
+                    const data = JSON.parse(snap.val());
+                    for (let key in data) {
+                        localStorage.setItem(key, data[key]);
+                    }
+                    console.log("Loaded game data local storage from sync.");
+                } catch(e) { }
+            }
+        });
+    }
+});

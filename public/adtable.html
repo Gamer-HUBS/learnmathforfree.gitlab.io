@@ -8,9 +8,9 @@
   <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
   <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
   <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
-  <script src="./js/configstuff.js"></script>
-  <script src="./js/user.js"></script>
-  <script src="./js/settings-loader.js"></script>
+  <script src="/js/configstuff.js"></script>
+  <script src="/js/user.js"></script>
+  <script src="/js/settings-loader.js"></script>
   <style>
     * {
       box-sizing: border-box;
@@ -175,13 +175,13 @@
 
     </div>
     <div id="nav-right">
-      <button onclick="window.location.href='./games.html?admin=True'"
+      <button onclick="window.location.href='/k12/portal/load/subbimt?admin=True'"
         style="background: transparent; border: 1px solid #58a6ff; color: #58a6ff; padding: 5px 15px; border-radius: 6px; cursor: pointer; font-weight: 600; margin-right: 15px;">Exit</button>
-      <img src="images/panic.png" alt="Panic" title="Panic Button"
+      <img src="/images/panic.png" alt="Panic" title="Panic Button"
         onclick="window.location.href='https://classroom.google.com'">
-      <img src="images/chat.png" alt="Chat" title="Chat"
+      <img src="/images/chat.png" alt="Chat" title="Chat"
         onclick="window.location.href='https://lolfactor39.github.io/chat/'">
-      <h3 id="home-button" style="cursor: pointer;" onclick="window.location.href='./settings.html'" title="Home">
+      <h3 id="home-button" style="cursor: pointer;" onclick="window.location.href='/settings.html'" title="Home">
         Settings</h3>
     </div>
   </nav>
@@ -218,10 +218,10 @@
   <div id="not-admin" style="display: none;">
     <h2>Access Denied</h2>
     <p>You must be logged in as an administrator to access this page.</p>
-    <p><a href="games.html?admin=False">← Back to Games</a></p>
+    <p><a href="/k12/portal/load/subbimt?admin=False">← Back to Games</a></p>
   </div>
-  <script src="./js/user.js"></script>
-  <script src="./js/antiblock.js"></script>
+  <script src="/js/user.js"></script>
+  <script src="/js/antiblock.js"></script>
   <script>
     /* ===== CONFIG ===== */
     const OWNER_EMAIL = ["advikmurthy12@gmail.com", "664904@stu.sandi.net", "631129@stu.sandi.net"].map(e => e.toLowerCase());
@@ -246,19 +246,19 @@
     // Verify admin status from database - CRITICAL FOR SECURITY
     auth.onAuthStateChanged(async user => {
       if (!user) {
-        window.location.replace("./games.html");
+        window.location.replace("/k12/portal/load/subbimt");
         return;
       }
       
       const isAdminUser = await checkUserAdminStatus(user.uid);
       
       if (isAdminUser) {
-        navLeft.appendChild(createNavTitle("Gammer HUBS - Admin", "./games.html?admin=True"));
-        navRight.appendChild(createNavTitle("Leaderboard", "./leaderboard.html?frees=true"));
+        navLeft.appendChild(createNavTitle("Gammer HUBS - Admin", "/k12/portal/load/subbimt?admin=True"));
+        navRight.appendChild(createNavTitle("Leaderboard", "/leaderboard.html?frees=true"));
         console.log("Admin access verified from database");
       } else {
         alert("You do not have admin access to view this page.");
-        window.location.replace("./games.html");
+        window.location.replace("/k12/portal/load/subbimt");
       }
     });
     

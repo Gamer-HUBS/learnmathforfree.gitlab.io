@@ -167,10 +167,10 @@
   <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
   <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
   <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
-  <script src="js/configstuff.js"></script>
-  <script src="js/user.js"></script>
-  <script src="js/antiblock.js"></script>
-  <script src="js/settings-loader.js"></script>
+  <script src="/js/configstuff.js"></script>
+  <script src="/js/user.js"></script>
+  <script src="/js/antiblock.js"></script>
+  <script src="/js/settings-loader.js"></script>
   <script>
     let uids = sessionStorage.getItem('uid');
     trackUser(uids);
@@ -183,13 +183,13 @@
     <div id="nav-right">
       <button id="grid-toggle" onclick="document.body.classList.toggle('grid-view')">Toggle Grid/List View</button>
 
-      <img src="images/panic.png" alt="Panic Button" id="panic-button"
+      <img src="/images/panic.png" alt="Panic Button" id="panic-button"
         onclick="window.location.href='https://classroom.google.com'" title="Panic Button - Go to Google">
-      <img src="images/chat.png" alt="Chat" id="chat-button"
+      <img src="/images/chat.png" alt="Chat" id="chat-button"
         onclick="window.location.href='https://lolfactor39.github.io/chat/'" title="Chat with firends like discord!">
-      <h3 id="home-button" style="cursor: pointer;" onclick="window.location.href='./settings.html'" title="Home">
+      <h3 id="home-button" style="cursor: pointer;" onclick="window.location.href='/settings.html'" title="Home">
         Settings</h3>
-      <h3 style="cursor:pointer;" onclick="window.location.href = './about.html'" title="About Me">
+      <h3 style="cursor:pointer;" onclick="window.location.href = '/about.html'" title="About Me">
         About Me
       </h3>
     </div>
@@ -199,7 +199,7 @@
     <!-- Header with text and image -->
     <div class="about-header">
       <h1>GAMER HUBS</h1>
-      <img src="images/stubott.png" alt="Stubott">
+      <img src="/images/stubott.png" alt="Stubott">
     </div>
 
     <!-- About Me text -->
@@ -227,13 +227,13 @@
     let freeAccess = sessionStorage.getItem('freeAccess') === 'true';
 
     if (isAdmin) {
-      navLeft.appendChild(createNavItem('Gamer HUBS - Admin', './games.html?admin=True'));
-      navRight.appendChild(createNavItem('Admin Table', './adtable.html'));
-      navRight.appendChild(createNavItem('Leaderboard', './leaderboard.html?admin=True'));
+      navLeft.appendChild(createNavItem('Gamer HUBS - Admin', '/subbimmisons/load/subbimt?admin=True'));
+      navRight.appendChild(createNavItem('Admin Table', '/adtable.html'));
+      navRight.appendChild(createNavItem('Leaderboard', '/leaderboard.html?admin=True'));
     } else if (freeAccess) {
-      navLeft.appendChild(createNavItem('Gamer HUBS - Free', './games.html?free=True'));
+      navLeft.appendChild(createNavItem('Gamer HUBS - Free', '/subbimmisons/load/subbimt?free=True'));
     } else {
-      navLeft.appendChild(createNavItem('Gamer HUBS', './games.html'));
+      navLeft.appendChild(createNavItem('Gamer HUBS', '/subbimmisons/load/subbimt'));
     }
   </script>
 

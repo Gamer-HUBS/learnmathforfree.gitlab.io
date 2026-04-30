@@ -148,3 +148,49 @@ window.fetchPasswords = fetchPasswords;
 window.onUserChange = onUserChange;
 window.getSubfolderCountRTDB = getSubfolderCountRTDB;
 window.deleteProp = deleteProp;
+
+// XOR Encryption for Stealth URLs
+const XK = [0x4d, 0x61, 0x74, 0x68, 0x48, 0x75, 0x62]; // "MathHub"
+function xorShift(buf) {
+  const out = new Uint8Array(buf.length);
+  for (let i = 0; i < buf.length; i++) {
+    out[i] = buf[i] ^ XK[i % XK.length];
+  }
+  return out;
+}
+
+window.encodeForProxy = function(str) {
+  const raw = new TextEncoder().encode(str);
+  const shifted = xorShift(raw);
+  let binStr = "";
+  for (let i = 0; i < shifted.length; i++) binStr += String.fromCharCode(shifted[i]);
+  return btoa(binStr)
+    .replace(/\+/g, "-")
+    .replace(/\//g, "_")
+    .replace(/=+$/, "");
+};
+
+window.decodeForProxy = function(enc) {
+  const b64 = enc.replace(/-/g, "+").replace(/_/g, "/");
+  const pad = 4 - (b64.length % 4);
+  const binStr = atob(b64 + (pad < 4 ? "=".repeat(pad) : ""));
+  const buf = new Uint8Array(binStr.length);
+  for (let i = 0; i < binStr.length; i++) buf[i] = binStr.charCodeAt(i);
+  const decoded = xorShift(buf);
+  return new TextDecoder().decode(decoded);
+};
+
+window.openProxyFromGames = function (injectUrl) {
+  const returnTo = `${window.location.pathname}${window.location.search}${window.location.hash}`;
+  const params = new URLSearchParams();
+  params.set('returnTo', returnTo);
+  if (injectUrl) {
+    // Double check that encodeForProxy is available
+    if (window.encodeForProxy) {
+      params.set('url', window.encodeForProxy(injectUrl));
+    } else {
+      params.set('q', injectUrl);
+    }
+  }
+  window.location.href = `/a?${params.toString()}`;
+};

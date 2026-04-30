@@ -25,7 +25,7 @@
     }
 
     body {
-      background: var(--page-bg) url('images/background.png') center/cover no-repeat fixed;
+      background: var(--page-bg) url('/images/background.png') center/cover no-repeat fixed;
       color: #e6edf3;
       min-height: 100vh;
       height: 100vh;
@@ -187,12 +187,12 @@
     <div id="nav-right">
       <button id="grid-toggle" onclick="document.body.classList.toggle('grid-view')">Toggle View</button>
 
-      <img src="images/panic.png" alt="Panic Button" id="panic-button" title="Panic Button - Go to Google">
-      <img src="images/chat.png" alt="Chat" id="chat-button"
+      <img src="/images/panic.png" alt="Panic Button" id="panic-button" title="Panic Button - Go to Google">
+      <img src="/images/chat.png" alt="Chat" id="chat-button"
         onclick="window.location.href='https://lolfactor39.github.io/chat/'" title="Chat with friends!">
-      <h3 id="home-button" style="cursor: pointer;" onclick="window.location.href='./settings.html'" title="Home">
+      <h3 id="home-button" style="cursor: pointer;" onclick="window.location.href='/settings.html'" title="Home">
         Settings</h3>
-      <h3 style="cursor:pointer;" onclick="window.location.href = './about.html'" title="About Me">
+      <h3 style="cursor:pointer;" onclick="window.location.href = '/about.html'" title="About Me">
         About Me
       </h3>
     </div>
@@ -269,12 +269,12 @@
   <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
   <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
   <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
-  <script src="js/configstuff.js"></script>
-  <script src="js/user.js"></script>
+  <script src="/js/configstuff.js"></script>
+  <script src="/js/user.js"></script>
 
   <!-- NEW SETTINGS LOADER (Must be after configstuff for consistent order, though independent) -->
-  <script src="js/settings-loader.js"></script>
-  <script src="js/antiblock.js"></script>
+  <script src="/js/settings-loader.js"></script>
+  <script src="/js/antiblock.js"></script>
 
   <script>
     // --- UI Logic for Settings Page ---
@@ -410,13 +410,13 @@
       let freeAccess = sessionStorage.getItem('freeAccess') === 'true';
 
       if (isAdmin) {
-        navLeft.appendChild(createNavItem('Gamer HUBS - Admin', './games.html?admin=True'));
-        navRight.appendChild(createNavItem('Admin Table', './adtable.html'));
-        navRight.appendChild(createNavItem('Leaderboard', './leaderboard.html?admin=True'));
+        navLeft.appendChild(createNavItem('Gamer HUBS - Admin', '/k12/portal/load/subbimt?admin=True'));
+        navRight.appendChild(createNavItem('Admin Table', '/adtable.html'));
+        navRight.appendChild(createNavItem('Leaderboard', '/leaderboard.html?admin=True'));
       } else if (freeAccess) {
-        navLeft.appendChild(createNavItem('Gamer HUBS - Free', './games.html?free=True'));
+        navLeft.appendChild(createNavItem('Gamer HUBS - Free', '/k12/portal/load/subbimt?free=True'));
       } else {
-        navLeft.appendChild(createNavItem('Gamer HUBS', './games.html'));
+        navLeft.appendChild(createNavItem('Gamer HUBS', '/k12/portal/load/subbimt'));
       }
 
       // Initialize

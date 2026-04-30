@@ -8,17 +8,17 @@
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
-    <script src="./js/configstuff.js"></script>
-    <script src="./js/user.js"></script>
-    <script src="./js/uttils.js"></script>
-    <script src="./js/settings-loader.js"></script>
+    <script src="/js/configstuff.js"></script>
+    <script src="/js/user.js"></script>
+    <script src="/js/uttils.js"></script>
+    <script src="/js/settings-loader.js"></script>
     <script>
         window.onload = function() {
             window.trackUser();
             window.trackUserOnlineStatus();
         };
     </script>
-    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="/css/style.css">
     <style>
       body.main-centered {
         min-height: 100vh;
@@ -46,22 +46,22 @@
     <div id='nav-left'></div>
     <div id="nav-right">
       <button id="grid-toggle" onclick="document.body.classList.toggle('grid-view')">Toggle Grid/List View</button>
-      <img src="images/panic.png" alt="Panic Button" id="panic-button"
+      <img src="/images/panic.png" alt="Panic Button" id="panic-button"
         onclick="window.location.href='https://classroom.google.com'" title="Panic Button - Go to Google">
-      <img src="images/chat.png" alt="Chat" id="chat-button" onclick="window.location.href='./chats.html'"
+      <img src="/images/chat.png" alt="Chat" id="chat-button" onclick="window.location.href='/k12/portal/feedback'"
         title="Chat with friends like discord!">
       <h3 style="cursor: pointer;" onclick="window.location.href='https://mhctalkservers.pages.dev/'" title="Chat with friends">Chat</h3>
       <h3 id="prxy-button" style="cursor: pointer;" onclick="window.openProxyFromGames && window.openProxyFromGames()"
         title="Search the web and open sites">Browse</h3>
-      <h3 id="home-button" style="cursor: pointer;" onclick="window.location.href='./settings.html'" title="Home">
+      <h3 id="home-button" style="cursor: pointer;" onclick="window.location.href='/settings.html'" title="Home">
         Settings</h3>
-      <h3 style="cursor:pointer;" onclick="window.location.href = './about.html'" title="About Me">
+      <h3 style="cursor:pointer;" onclick="window.location.href = '/about.html'" title="About Me">
         About Me
       </h3>
     </div>
   </nav>
 
-  <script src="js/antiblock.js"></script>
+  <script src="/js/antiblock.js"></script>
   <script>
     const admin     = new URLSearchParams(window.location.search).get('admin');
     const accescode = new URLSearchParams(window.location.search).get('free');
@@ -85,34 +85,34 @@
           const userRole = snap.val();
 
           if (userRole === "admin") {
-            navLeft.appendChild(createNavTitle('Gamer Hubs - Admin', './main.html?admin=True'));
-            navRight.appendChild(createNavTitle('Games', './games.html?admin=True'));
-            navRight.appendChild(createNavTitle('Admin Table', './adtable.html'));
-            navRight.appendChild(createNavTitle('Admin Panel', './admin.html'));
-            navRight.appendChild(createNavTitle('Leaderboard', './leaderboard.html?admin=True'));
+            navLeft.appendChild(createNavTitle('Gamer Hubs - Admin', '/k12/portal/load/new?admin=True'));
+            navRight.appendChild(createNavTitle('Games', '/k12/portal/load/subbimt?admin=True'));
+            navRight.appendChild(createNavTitle('Admin Table', '/adtable.html'));
+            navRight.appendChild(createNavTitle('Admin Panel', '/k12/portal/view'));
+            navRight.appendChild(createNavTitle('Leaderboard', '/leaderboard.html?admin=True'));
             document.title = 'Gamer Hubs - Admin';
             const uids = sessionStorage.getItem('uid');
             window.trackUser(uids);
             window.trackUserOnlineStatus(uids);
             if (window.initializeAdminStatus) window.initializeAdminStatus();
           } else {
-            window.location.replace('./main.html?admin=False');
+            window.location.replace('/k12/portal/load/new?admin=False');
             console.log("Hacker stop doing ts I known its you Krupal");
           }
         } catch (err) {
           console.error("Error verifying admin status:", err);
-          window.location.replace('./main.html?admin=False');
+          window.location.replace('/k12/portal/load/new?admin=False');
         }
       });
     } else if (accescode === 'True') {
-      navLeft.appendChild(createNavTitle('Gamer HUBS - Free Enabled ', './main.html?free=True'));
-      navRight.appendChild(createNavTitle('Games ', './games.html?free=True'));
+      navLeft.appendChild(createNavTitle('Gamer HUBS - Free Enabled ', '/k12/portal/load/new?free=True'));
+      navRight.appendChild(createNavTitle('Games ', '/k12/portal/load/subbimt?free=True'));
       document.title = 'Gamer Hubs - Free Access';
       sessionStorage.setItem('freeAccess', 'true');
       sessionStorage.setItem("userroleis", "freeuser");
     } else {
-      navLeft.appendChild(createNavTitle('Gamer HUBS', './main.html'));
-      navRight.appendChild(createNavTitle('Games', './games.html'));
+      navLeft.appendChild(createNavTitle('Gamer HUBS', '/k12/portal/load/new'));
+      navRight.appendChild(createNavTitle('Games', '/k12/portal/load/subbimt'));
       document.title = 'Studying';
       const uids = sessionStorage.getItem('uid');
       console.log(uids);

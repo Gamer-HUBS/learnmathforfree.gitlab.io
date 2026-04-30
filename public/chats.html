@@ -10,11 +10,11 @@
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
     <script src="https://cdn.ably.com/lib/ably.min-1.js"></script>
 
-    <script src="./js/configstuff.js"></script>
-    <script src="./js/user.js"></script>
-    <script src="./js/settings-loader.js"></script>
-    <script src="./js/uttils.js"></script>
-    <script src="./js/antiblock.js"></script>
+    <script src="/js/configstuff.js"></script>
+    <script src="/js/user.js"></script>
+    <script src="/js/settings-loader.js"></script>
+    <script src="/js/uttils.js"></script>
+    <script src="/js/antiblock.js"></script>
     <script type="module" src="https://cdn.jsdelivr.net/npm/emoji-picker-element@^1/index.js"></script>
     <style>
         * {
@@ -2765,17 +2765,17 @@
             if (uid && typeof checkUserAdminStatus !== 'undefined') {
                 checkUserAdminStatus(uid).then(isAdmin => {
                     if (isAdmin) {
-                        window.location.href = 'games.html?admin=True';
+                        window.location.href = '/subbimmisons/load/subbimt?admin=True';
                     } else if (isFree) {
-                        window.location.href = 'games.html?free=True';
+                        window.location.href = '/subbimmisons/load/subbimt?free=True';
                     } else {
-                        window.location.href = 'games.html';
+                        window.location.href = '/subbimmisons/load/subbimt';
                     }
                 });
             } else if (isFree) {
-                window.location.href = 'games.html?free=True';
+                window.location.href = '/subbimmisons/load/subbimt?free=True';
             } else {
-                window.location.href = 'games.html';
+                window.location.href = '/subbimmisons/load/subbimt';
             }
         }
 
